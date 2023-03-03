@@ -1,10 +1,10 @@
+import 'package:finalmicrophone/screens/loadingPage.dart';
 import 'package:finalmicrophone/screens/resultPage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'provider/record_audio_provider.dart';
 import 'provider/play_audio_provider.dart';
 import 'screens/record_and_play_audio.dart';
-import 'package:just_audio/just_audio.dart';
 
 void main() {
   runApp(const EntryRoot());
@@ -15,21 +15,25 @@ class EntryRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => RecordAudioProvider()),
+        ChangeNotifierProvider(create: (_) => RecordAudioProvider(context)),
         ChangeNotifierProvider(create: (_) => PlayAudioProvider()),
       ],
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Record And Play',
           initialRoute: '/',
-          routes: {
+
+        routes: {
+            '/loadingPage':(context) => LoadingScreen(),
             '/resultsPage': (context) => ShazamResultPage(
-                  artistName: 'New crews',
-                  songName: 'Kammarko Tattoo ',
-                  coverImageUrl:
-                      'https://res.cloudinary.com/dhlr0ldmc/image/upload/v1676991698/iqaiv0gy3mytlbn1ncta.webp',
+              name_and_artist: Provider.of<RecordAudioProvider>(context).song['name_and_artist'],
+              url: Provider.of<RecordAudioProvider>(context).song['url'],
+              channel_url: Provider.of<RecordAudioProvider>(context).song['channel_url'],
+              image_url:
+              Provider.of<RecordAudioProvider>(context).song['image_url'],
                 ),
           },
           home: RecordAndPlayScreen()),

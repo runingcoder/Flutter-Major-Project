@@ -23,6 +23,8 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
   Widget build(BuildContext context) {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
     final _playProvider = Provider.of<PlayAudioProvider>(context);
+    if (_recordProvider.recordedFilePath.isNotEmpty &&
+        !_playProvider.isSongPlaying){  Navigator.of(context).pushNamed('/loadingPage');}
     return Scaffold(
         backgroundColor: Colors.white,
         body: Container(
@@ -38,6 +40,7 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
               children: [
                 InkWell(
                   onTap: () {
+                    print(_recordProvider.received);
                     Navigator.of(context).pushNamed('/resultsPage');
                   },
                   child: Container(
@@ -62,22 +65,22 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                 const SizedBox(
                   height: 30,
                 ),
-                _recordProvider.recordedFilePath.isEmpty
-                    ? _recordHeading()
-                    : _playAudioHeading(),
+               _recordHeading()
+                   ,
                 const SizedBox(
                   height: 40,
                 ),
-                _recordProvider.recordedFilePath.isEmpty
-                    ? _recordingSection()
-                    : _audioPlayingSection(),
+              _recordingSection()
+                   ,
                 if (_recordProvider.recordedFilePath.isNotEmpty &&
                     !_playProvider.isSongPlaying)
                   const SizedBox(height: 40),
-                if (_recordProvider.recordedFilePath.isNotEmpty &&
-                    !_playProvider.isSongPlaying)
-                  _resetButton(),
-              ],
+
+                  // _resetButton(),
+                  // _loadingPage(),
+
+
+    ],
             )));
   }
 
@@ -202,13 +205,36 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
       ),
     ));
   }
+_loadingPage(){
+  final _recordProvider = Provider.of<RecordAudioProvider>(context);
+  if (_recordProvider.received){
+    Navigator.of(context).pushNamed('/resultsPage');
+  }
+
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Loading...'),
+        ],
+      ),
+    ),
+  );
+
+}
+
+
+
 
   _resetButton() {
     final _recordProvider =
         Provider.of<RecordAudioProvider>(context, listen: false);
 
     return InkWell(
-      onTap: () => _recordProvider.clearOldData(),
+      // onTap: () => _recordProvider.clearOldData(),
       child: Center(
         child: Container(
           width: 80,
