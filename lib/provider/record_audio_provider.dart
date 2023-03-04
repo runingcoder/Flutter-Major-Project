@@ -10,10 +10,19 @@ import 'package:finalmicrophone/services/permission_management.dart';
 import 'package:finalmicrophone/services/toast_services.dart';
 
 class RecordAudioProvider extends ChangeNotifier {
+  Duration? _responseTime;
+  bool _keepLoading = false;
+  get keepLoading => _keepLoading;
+  get  responseTime => _responseTime;
+
+
+  void toggleLoading(){
+    _keepLoading = true;
+  }
   final BuildContext context;
   RecordAudioProvider( this.context);
   Map<String, dynamic> _song = {
-    'name_and_artist': 'Example Song',
+    'name': 'Example Song',
     'indices':'0000',
     'city': 'Torronto',
     'url': 'https://www.youtube.com/watch?v=example',
@@ -51,6 +60,7 @@ class RecordAudioProvider extends ChangeNotifier {
 
   clearOldData() {
     _afterRecordingFilePath = '';
+_received= false;
     notifyListeners();
   }
 
@@ -88,17 +98,20 @@ class RecordAudioProvider extends ChangeNotifier {
     _isRecording = false;
     notifyListeners();
     _afterRecordingFilePath = _audioFilePath ?? '';
-    final url = Uri.parse('http://192.168.0.102:90/upload-audio');
+    final url = Uri.parse('http://192.168.0.100:90/upload-audio');
     final file = File(_audioFilePath!);
 
     final request = http.MultipartRequest('POST', url);
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
-
+    _responseTime = null;
+    DateTime startTime = DateTime.now();
     final response = await request.send();
 
     if (response.statusCode == 200) {
       print('File uploaded successfully:');
-
+      DateTime endTime = DateTime.now();
+      _responseTime = endTime.difference(startTime);
+      notifyListeners();
       var finalResponse =  await response.stream.bytesToString();
       print('hello there');
       Map<String, dynamic> useResponse = jsonDecode(finalResponse);

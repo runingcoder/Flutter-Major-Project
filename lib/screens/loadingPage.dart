@@ -3,6 +3,7 @@ import '../provider/record_audio_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:finalmicrophone/screens/resultPage.dart';
 
+
 // class LoadingPage extends StatefulWidget {
 //   const LoadingPage({Key? key}) : super(key: key);
 //
@@ -58,24 +59,19 @@ import 'package:finalmicrophone/screens/resultPage.dart';
 class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    bool isLoading = Provider.of<RecordAudioProvider>(context).received;
-
-    if (isLoading) {
-      // Navigate to another route once isLoading is true
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ShazamResultPage(
-          name_and_artist: Provider.of<RecordAudioProvider>(context).song['name_and_artist'],
-          url: Provider.of<RecordAudioProvider>(context).song['url'],
-          channel_url: Provider.of<RecordAudioProvider>(context).song['channel_url'],
-          image_url:
-          Provider.of<RecordAudioProvider>(context).song['image_url'],
-        )));
-      });
-    }
+    bool isReceived = Provider.of<RecordAudioProvider>(context).received;
 
     return Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+
+          children: [
+            CircularProgressIndicator(),
+            isReceived? ElevatedButton( onPressed: () {
+              Navigator.of(context).pushNamed('/resultsPage');
+            },child: Text('Received')): Text("NOt received"),
+        ],)
       ),
     );
   }

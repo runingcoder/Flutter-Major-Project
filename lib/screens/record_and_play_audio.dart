@@ -21,10 +21,12 @@ class RecordAndPlayScreen extends StatefulWidget {
 class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
   @override
   Widget build(BuildContext context) {
+    bool isReceived = Provider.of<RecordAudioProvider>(context).received;
+
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
     final _playProvider = Provider.of<PlayAudioProvider>(context);
-    if (_recordProvider.recordedFilePath.isNotEmpty &&
-        !_playProvider.isSongPlaying){  Navigator.of(context).pushNamed('/loadingPage');}
+    //yo tala ko line nai milauna parcha
+
     return Scaffold(
         backgroundColor: Colors.white,
         body: Container(
@@ -38,12 +40,23 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
+                const SizedBox(
+                  height: 30,
+                ),
+                if(!_recordProvider.recordedFilePath.isNotEmpty) _recordHeading()
+                   ,
+                const SizedBox(
+                  height: 40,
+                ),
+                if(!_recordProvider.recordedFilePath.isNotEmpty) _recordingSection()
+                   ,
                 InkWell(
                   onTap: () {
-                    print(_recordProvider.received);
+                    print(_recordProvider.song);
                     Navigator.of(context).pushNamed('/resultsPage');
                   },
-                  child: Container(
+                  child: isReceived? Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
@@ -52,7 +65,7 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        "Press Me",
+                        "See Result!",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -60,22 +73,27 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                         ),
                       ),
                     ),
-                  ),
+                  ): Container(),
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
-               _recordHeading()
-                   ,
-                const SizedBox(
-                  height: 40,
-                ),
-              _recordingSection()
-                   ,
                 if (_recordProvider.recordedFilePath.isNotEmpty &&
                     !_playProvider.isSongPlaying)
                   const SizedBox(height: 40),
+    if (_recordProvider.recordedFilePath.isNotEmpty &&
+    !_playProvider.isSongPlaying && isReceived )
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
 
+        children: [_resetButton(),
+          const SizedBox(
+          height: 40,
+        ), Text('Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),],
+      ),
+
+                const SizedBox(
+                  height: 40,
+                ),
+                  (_recordProvider.recordedFilePath.isNotEmpty && !isReceived )?
+                      CircularProgressIndicator() :Text(''),
                   // _resetButton(),
                   // _loadingPage(),
 
@@ -234,7 +252,7 @@ _loadingPage(){
         Provider.of<RecordAudioProvider>(context, listen: false);
 
     return InkWell(
-      // onTap: () => _recordProvider.clearOldData(),
+      onTap: () => _recordProvider.clearOldData(),
       child: Center(
         child: Container(
           width: 80,

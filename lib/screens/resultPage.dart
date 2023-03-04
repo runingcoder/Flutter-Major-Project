@@ -56,99 +56,93 @@ class _ShazamResultPageState extends State<ShazamResultPage>
   Widget build(BuildContext context) {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
 
-    return WillPopScope(
-      onWillPop: () async {
-        _recordProvider. onWillPop();
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: Colors.purple[800],
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Cover Image
-              Expanded(
-                flex: 7,
-                child: AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    return FractionallySizedBox(
-                      heightFactor: 0.9,
-                      widthFactor: 1.0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.purple[800]!,
-                              Colors.purple[300]!,
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            FadeTransition(
-                              opacity: _animation,
-                              child: Image.network(
-                                widget.image_url,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
+    return Scaffold(
+      backgroundColor: Colors.purple[800],
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Cover Image
+            Expanded(
+              flex: 7,
+              child: AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return FractionallySizedBox(
+                    heightFactor: 0.9,
+                    widthFactor: 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.purple[800]!,
+                            Colors.purple[300]!,
                           ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-              // Song Name and Artist
-              Flexible(
-                flex: 3,
-                child: AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: Duration(milliseconds: 500),
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.name_and_artist,
-                          style: TextStyle(
-                            fontFamily: 'MycustomFont',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          FadeTransition(
+                            opacity: _animation,
+                            child: Image.network(
+                              widget.image_url,
+                              fit: BoxFit.fill,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          widget.url,
-                          style: TextStyle(
-                            fontFamily: 'MycustomFont',
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          widget.channel_url,
-                          style: TextStyle(
-                            fontFamily: 'MycustomFont',
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-
-                      ],
+                        ],
+                      ),
                     ),
+                  );
+                },
+              ),
+            ),
+            // Song Name and Artist
+            Flexible(
+              flex: 3,
+              child: AnimatedOpacity(
+                opacity: 1.0,
+                duration: Duration(milliseconds: 500),
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.name_and_artist,
+                        style: TextStyle(
+                          fontFamily: 'MycustomFont',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        widget.url,
+                        style: TextStyle(
+                          fontFamily: 'MycustomFont',
+                          fontSize: 18,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        widget.channel_url,
+                        style: TextStyle(
+                          fontFamily: 'MycustomFont',
+                          fontSize: 18,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -29,7 +29,7 @@ class EntryRoot extends StatelessWidget {
         routes: {
             '/loadingPage':(context) => LoadingScreen(),
             '/resultsPage': (context) => ShazamResultPage(
-              name_and_artist: Provider.of<RecordAudioProvider>(context).song['name_and_artist'],
+              name_and_artist: Provider.of<RecordAudioProvider>(context).song['name'],
               url: Provider.of<RecordAudioProvider>(context).song['url'],
               channel_url: Provider.of<RecordAudioProvider>(context).song['channel_url'],
               image_url:
