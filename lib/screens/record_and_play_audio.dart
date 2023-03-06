@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -19,15 +20,33 @@ class RecordAndPlayScreen extends StatefulWidget {
 }
 
 class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
+  signUserOut(){
+    FirebaseAuth.instance.signOut();
+  }
+
+  final user = FirebaseAuth.instance.currentUser!;
+// the problem was that the fontsize was big for my email to show.and shouldn't have messed with displayName cs
+//  new users don't seem to have displayName and even if I tried creating/involving that in the register
+//  function, it seems to be deprecated or smthg. Just use email for now.
+  //next is to, see, navigation bar, and making a db named history and associating,
+  //users with the searched songs. and adding, upload song functionality to send to server.
+
+
   @override
   Widget build(BuildContext context) {
     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
 
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
     final _playProvider = Provider.of<PlayAudioProvider>(context);
-    //yo tala ko line nai milauna parcha
 
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
+        ],
+        title: Text('Hello '+ user.email! + ' !' ,
+            style: TextStyle(fontSize: 18, color: Colors.black)),
+      ),
         backgroundColor: Colors.white,
         body: Container(
             width: MediaQuery.of(context).size.width,
@@ -44,61 +63,66 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                 const SizedBox(
                   height: 30,
                 ),
-                if(!_recordProvider.recordedFilePath.isNotEmpty) _recordHeading()
-                   ,
+                if (!_recordProvider.recordedFilePath.isNotEmpty)
+                  _recordHeading(),
                 const SizedBox(
                   height: 40,
                 ),
-                if(!_recordProvider.recordedFilePath.isNotEmpty) _recordingSection()
-                   ,
+                if (!_recordProvider.recordedFilePath.isNotEmpty)
+                  _recordingSection(),
                 InkWell(
                   onTap: () {
                     print(_recordProvider.song);
                     Navigator.of(context).pushNamed('/resultsPage');
                   },
-                  child: isReceived? Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        "See Result!",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ): Container(),
+                  child: isReceived
+                      ? Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "See Result!",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(),
                 ),
                 if (_recordProvider.recordedFilePath.isNotEmpty &&
                     !_playProvider.isSongPlaying)
                   const SizedBox(height: 40),
-    if (_recordProvider.recordedFilePath.isNotEmpty &&
-    !_playProvider.isSongPlaying && isReceived )
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-
-        children: [_resetButton(),
-          const SizedBox(
-          height: 40,
-        ), Text('Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),],
-      ),
+                if (_recordProvider.recordedFilePath.isNotEmpty &&
+                    !_playProvider.isSongPlaying &&
+                    isReceived)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _resetButton(),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      Text(
+                          'Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),
+                    ],
+                  ),
 
                 const SizedBox(
                   height: 40,
                 ),
-                  (_recordProvider.recordedFilePath.isNotEmpty && !isReceived )?
-                      CircularProgressIndicator() :Text(''),
-                  // _resetButton(),
-                  // _loadingPage(),
-
-
-    ],
+                (_recordProvider.recordedFilePath.isNotEmpty && !isReceived)
+                    ? CircularProgressIndicator()
+                    : Text(''),
+                // _resetButton(),
+                // _loadingPage(),
+              ],
             )));
   }
 
@@ -223,29 +247,26 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
       ),
     ));
   }
-_loadingPage(){
-  final _recordProvider = Provider.of<RecordAudioProvider>(context);
-  if (_recordProvider.received){
-    Navigator.of(context).pushNamed('/resultsPage');
-  }
 
-  return Scaffold(
-    body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Loading...'),
-        ],
+  _loadingPage() {
+    final _recordProvider = Provider.of<RecordAudioProvider>(context);
+    if (_recordProvider.received) {
+      Navigator.of(context).pushNamed('/resultsPage');
+    }
+
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading...'),
+          ],
+        ),
       ),
-    ),
-  );
-
-}
-
-
-
+    );
+  }
 
   _resetButton() {
     final _recordProvider =

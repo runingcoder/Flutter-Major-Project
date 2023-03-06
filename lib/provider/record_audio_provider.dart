@@ -10,6 +10,7 @@ import 'package:finalmicrophone/services/permission_management.dart';
 import 'package:finalmicrophone/services/toast_services.dart';
 
 class RecordAudioProvider extends ChangeNotifier {
+
   Duration? _responseTime;
   bool _keepLoading = false;
   get keepLoading => _keepLoading;
