@@ -27,6 +27,8 @@ dependencies:
   google_sign_in: ^6.0.2
   youtube_player_flutter: ^8.1.2
   connectivity_plus: ^3.0.3
+  file_picker: ^5.2.5
+  ffmpeg_kit_flutter: ^5.1.0
 
 
 dev_dependencies:

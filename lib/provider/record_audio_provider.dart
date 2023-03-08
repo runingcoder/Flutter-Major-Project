@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:ffmpeg_kit_flutter/session_state.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -8,9 +9,15 @@ import 'package:record/record.dart';
 import 'package:finalmicrophone/services/storage_management.dart';
 import 'package:finalmicrophone/services/permission_management.dart';
 import 'package:finalmicrophone/services/toast_services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
 
 class RecordAudioProvider extends ChangeNotifier {
+  final url = Uri.parse('http://192.168.0.103:90/upload-audio');
   bool _connectionfail = false;
+  bool _uploadStatus = false;
+  get uploadStatus => _uploadStatus;
 
   get connectionfail => _connectionfail;
   Duration? _responseTime;
@@ -53,7 +60,7 @@ class RecordAudioProvider extends ChangeNotifier {
   }
 
   final Record _record = Record();
-    bool _isRecording = false;
+  bool _isRecording = false;
   String _afterRecordingFilePath = '';
 
   bool get isRecording => _isRecording;
@@ -70,14 +77,50 @@ class RecordAudioProvider extends ChangeNotifier {
     _afterRecordingFilePath = '';
     _received = false;
     _connectionfail = false;
+    _uploadStatus =false;
     notifyListeners();
   }
-  uploadVoice() async {
+postRequest(String originalPath) async {
+  try {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://192.168.0.103:90/upload-audio'),
+    );
+    final audioFileField =
+        await http.MultipartFile.fromPath('file', originalPath!);
+    request.files.add(audioFileField);
+    _responseTime = null;
+    DateTime startTime = DateTime.now();
+    // Send the request and await the response
+    final response = await request.send();
+    // Handle the response
+    if (response.statusCode == 200) {
+      print('File uploaded successfully:');
+      DateTime endTime = DateTime.now();
+      _responseTime = endTime.difference(startTime);
+      notifyListeners();
+      var finalResponse = await response.stream.bytesToString();
+      print('hello there');
+      Map<String, dynamic> useResponse = jsonDecode(finalResponse);
+      setSong(useResponse);
+      changeStatus();
+    } else {
+      print('Error while uploading file');
+      _connectionfail = true;
+      print('conenction fail is ' + _connectionfail.toString());
 
+      notifyListeners();
+    }
+  } catch (e) {
+    print('Error sending post request: $e');
+    _connectionfail = true;
+    print('connection fail is  ' +
+        _connectionfail.toString() +
+        'in catch block');
 
+    notifyListeners();
   }
-
-
+}
   recordVoice() async {
     final _isPermitted = (await PermissionManagement.recordingPermission()) &&
         (await PermissionManagement.storagePermission());
@@ -100,6 +143,21 @@ class RecordAudioProvider extends ChangeNotifier {
 
     showToast('Recording Started');
   }
+  uploadAudio() async {
+    final audioFile = await FilePicker.platform.pickFiles(type: FileType.audio);
+    if (audioFile == null) return;
+    if (audioFile != null) {
+      final filePath = audioFile.files.single.path;
+
+      print('First Uploaded');
+      _uploadStatus = true;
+      notifyListeners();
+      postRequest(filePath!);
+      notifyListeners();
+    }
+  }
+
+
 
   stopRecording() async {
     String? _audioFilePath;
@@ -112,42 +170,9 @@ class RecordAudioProvider extends ChangeNotifier {
     _isRecording = false;
     notifyListeners();
     _afterRecordingFilePath = _audioFilePath ?? '';
-    final url = Uri.parse('http://192.168.0.103:90/upload-audio');
+
     final file = File(_audioFilePath!);
-    try {
-      final request = http.MultipartRequest('POST', url);
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
-      _responseTime = null;
-      DateTime startTime = DateTime.now();
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        print('File uploaded successfully:');
-        DateTime endTime = DateTime.now();
-        _responseTime = endTime.difference(startTime);
-        notifyListeners();
-        var finalResponse = await response.stream.bytesToString();
-        print('hello there');
-        Map<String, dynamic> useResponse = jsonDecode(finalResponse);
-        setSong(useResponse);
-        changeStatus();
-      } else {
-        print('Error while uploading file');
-        _connectionfail = true;
-        print('conenction fail is ' + _connectionfail.toString());
-
-        notifyListeners();
-      }
-    } catch (e) {
-      print('Error sending post request: $e');
-      _connectionfail = true;
-      print('conenction fail is ' + _connectionfail.toString());
-
-      notifyListeners();
-    }
-
-    print('Audio file path: $_audioFilePath');
-
+    postRequest(_audioFilePath!);
     notifyListeners();
   }
 }

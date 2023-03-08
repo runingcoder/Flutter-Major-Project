@@ -20,8 +20,6 @@ class RecordAndPlayScreen extends StatefulWidget {
 }
 
 class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
-
-
   final user = FirebaseAuth.instance.currentUser!;
 
 // the problem was that the fontsize was big for my email to show.and shouldn't have messed with displayName cs
@@ -32,7 +30,6 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
 
   late double _height;
 
-
   @override
   Widget build(BuildContext context) {
     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
@@ -41,7 +38,25 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
 
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
     final _playProvider = Provider.of<PlayAudioProvider>(context);
-
+    bool isRecordingInProgress = _recordProvider.recordedFilePath.isNotEmpty &&
+        !isReceived &&
+        !connectionFail;
+    bool isUploadingInProgress =
+        _recordProvider.uploadStatus && !isReceived && !connectionFail;
+    bool resultAfterRecording = _recordProvider.recordedFilePath.isNotEmpty &&
+        !_playProvider.isSongPlaying &&
+        _recordProvider.received;
+    bool resultAfterUploading = _recordProvider.uploadStatus &&
+        !_playProvider.isSongPlaying &&
+        _recordProvider.received;
+    bool uploadAudioCase = !_recordProvider.uploadStatus &&
+        !_recordProvider.recordedFilePath.isNotEmpty &&
+        !_recordProvider.isRecording &&
+        !connectionFail;
+    bool recordAudioCase = !_recordProvider.uploadStatus &&
+        !_recordProvider.recordedFilePath.isNotEmpty &&
+        !connectionFail;
+    String imageUrlBG =   'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -58,7 +73,7 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                 image: DecorationImage(
                     fit: BoxFit.cover,
                     image: NetworkImage(
-                        'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'))),
+                      imageUrlBG))),
             child: SingleChildScrollView(
               child: Column(
                 //this doesn't matter if SIngelChildScrollView is used.
@@ -67,134 +82,124 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                   const SizedBox(
                     height: 200,
                   ),
-                  if (!_recordProvider.recordedFilePath.isNotEmpty && !_recordProvider.isRecording)
-                    _recordHeading('Upload Audio'),
+                  if (uploadAudioCase) _recordHeading('Upload Audio'),
                   const SizedBox(
                     height: 40,
                   ),
-                  if (!_recordProvider.recordedFilePath.isNotEmpty && !_recordProvider.isRecording)
-                    _uploadSection(),
+                  if (uploadAudioCase) _uploadSection(),
                   const SizedBox(
                     height: 60,
                   ),
-                  if (!_recordProvider.recordedFilePath.isNotEmpty)
-                    _recordHeading('Record Audio'),
+                  if (recordAudioCase) _recordHeading('Record Audio'),
                   const SizedBox(
                     height: 40,
                   ),
-                  if (!_recordProvider.recordedFilePath.isNotEmpty)
-                    _recordingSection(),
-                  if (connectionFail)
-                    SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Could not send request',
-                            style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                          ),
-                          const SizedBox(height: 80),
-                          GestureDetector(
-                            onTap: () {
-                              Provider.of<RecordAudioProvider>(context,
-                                      listen: false)
-                                  .clearOldData();
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'Go back',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  if (recordAudioCase) _recordingSection(),
+                  if (connectionFail) afterConnectionFail(),
+                  afterReceived(),
+                  const SizedBox(height: 40),
 
-                  InkWell(
-                    onTap: () {
-                      print(_recordProvider.song);
-                      Navigator.of(context).pushNamed('/resultsPage');
-                    },
-                    child: isReceived
-                        ? Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                "See Result!",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ),
-                          )
-                        : Container(),
-                  ),
-                  if (_recordProvider.recordedFilePath.isNotEmpty &&
-                      !_playProvider.isSongPlaying)
-                    const SizedBox(height: 40),
-
-                  if (_recordProvider.recordedFilePath.isNotEmpty &&
-                      !_playProvider.isSongPlaying &&
-                      isReceived)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _resetButton(),
-                        const SizedBox(
-                          height: 40,
-                        ),
-                        Text(
-                            'Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),
-                      ],
-                    ),
-
+                  if (resultAfterRecording) ResultColumn(),
+                  if (resultAfterUploading) ResultColumn(),
                   const SizedBox(
                     height: 40,
                   ),
-                  (_recordProvider.recordedFilePath.isNotEmpty &&
-                          !isReceived &&
-                          !connectionFail)
-                      ? CircularProgressIndicator()
-                      : Text(''),
+                  if (isRecordingInProgress) CircularProgressIndicator(),
+                  if (!isRecordingInProgress) Text(''),
+                  if (isUploadingInProgress) CircularProgressIndicator(),
+                  if (!isUploadingInProgress) Text(''),
+
                   // _resetButton(),
                   // _loadingPage(),
                 ],
               ),
             )));
   }
-_uploadSection() {
-  final _recordProvider = Provider.of<RecordAudioProvider>(context);
-  final _recordProviderWithoutListener =
-  Provider.of<RecordAudioProvider>(context, listen: false);
-  return InkWell(
-    onTap: () async => await _recordProviderWithoutListener.uploadVoice(),
-    child: _commonIconSection(Icons.upload, Colors.brown ),
-  );
-}
-  _recordHeading( String messageTime) {
-    return  Center(
+
+  afterConnectionFail() {
+    final _recordProvider = Provider.of<RecordAudioProvider>(context);
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Could not send request',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          ),
+          const SizedBox(height: 80),
+          GestureDetector(
+            onTap: () {
+              Provider.of<RecordAudioProvider>(context, listen: false)
+                  .clearOldData();
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Go back',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  afterReceived() {
+    final _recordProvider = Provider.of<RecordAudioProvider>(context);
+
+    return InkWell(
+      onTap: () {
+        print(_recordProvider.song);
+        Navigator.of(context).pushNamed('/resultsPage');
+      },
+      child: _recordProvider.received
+          ? Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  "See Result!",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            )
+          : Container(),
+    );
+  }
+
+  _uploadSection() {
+    final _recordProviderWithoutListener =
+        Provider.of<RecordAudioProvider>(context, listen: false);
+    return InkWell(
+      onTap: () async => await _recordProviderWithoutListener.uploadAudio(),
+      child: _commonIconSection(Icons.upload, Colors.brown),
+    );
+  }
+
+  _recordHeading(String messageTime) {
+    return Center(
       child: Text(
         messageTime,
         style: TextStyle(
@@ -203,12 +208,26 @@ _uploadSection() {
     );
   }
 
+  ResultColumn() {
+    final _recordProvider = Provider.of<RecordAudioProvider>(context);
 
-  signUserOut() {
-    Provider.of<RecordAudioProvider>(context,listen:false).clearOldData();
-    FirebaseAuth.instance.signOut();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _resetButton(),
+        const SizedBox(
+          height: 40,
+        ),
+        Text(
+            'Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),
+      ],
+    );
   }
 
+  signUserOut() {
+    Provider.of<RecordAudioProvider>(context, listen: false).clearOldData();
+    FirebaseAuth.instance.signOut();
+  }
 
   _recordingSection() {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
@@ -253,8 +272,7 @@ _uploadSection() {
         color: color,
         borderRadius: BorderRadius.circular(100),
       ),
-      child:  Icon(iconData,
-          color: Colors.white, size: 30),
+      child: Icon(iconData, color: Colors.white, size: 30),
     );
   }
 

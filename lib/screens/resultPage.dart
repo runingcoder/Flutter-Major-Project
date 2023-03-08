@@ -51,9 +51,34 @@ class _ShazamResultPageState extends State<ShazamResultPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Cover Image
-              // Song Name and Artist
+          Container(
+
+          height: MediaQuery.of(context).size.height * 0.7,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.4, 1.0],
+              colors: [Colors.purple.withOpacity(0.5), Colors.purple.withOpacity(0.6)],
+            ),
+            image: DecorationImage(
+              image: NetworkImage(widget.image_url),
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+
               Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0.4, 1.0],
+                    colors: [Colors.cyan.withOpacity(0.5), Colors.purple.withOpacity(0.6)],
+                  ),
+
+                ),
                 padding: EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +91,7 @@ class _ShazamResultPageState extends State<ShazamResultPage>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 200),
                     YoutubePlayer(controller: _ycontroller,
                         showVideoProgressIndicator: true,
                         progressIndicatorColor: Colors.amber,
@@ -86,8 +111,7 @@ class _ShazamResultPageState extends State<ShazamResultPage>
 
 
                     ),
-                    SizedBox(height: 900),
-                    Text('sdfasdf'),
+
 
                   ],
                 ),
