@@ -99,7 +99,7 @@ _received= false;
     _isRecording = false;
     notifyListeners();
     _afterRecordingFilePath = _audioFilePath ?? '';
-    final url = Uri.parse('http://192.168.0.100:90/upload-audio');
+      final url = Uri.parse('http://192.168.0.103:90/upload-audio');
     final file = File(_audioFilePath!);
 
     final request = http.MultipartRequest('POST', url);

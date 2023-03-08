@@ -13,6 +13,7 @@ import '../provider/record_audio_provider.dart';
 import 'package:just_audio/just_audio.dart';
 
 class RecordAndPlayScreen extends StatefulWidget {
+
   const RecordAndPlayScreen({Key? key}) : super(key: key);
 
   @override
@@ -31,9 +32,10 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
   //next is to, see, navigation bar, and making a db named history and associating,
   //users with the searched songs. and adding, upload song functionality to send to server.
 
-
+  late double _height ;
   @override
   Widget build(BuildContext context) {
+
     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
 
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
@@ -56,73 +58,76 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                     fit: BoxFit.cover,
                     image: NetworkImage(
                         'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'))),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                //this doesn't matter if SIngelChildScrollView is used.
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-                const SizedBox(
-                  height: 30,
-                ),
-                if (!_recordProvider.recordedFilePath.isNotEmpty)
-                  _recordHeading(),
-                const SizedBox(
-                  height: 40,
-                ),
-                if (!_recordProvider.recordedFilePath.isNotEmpty)
-                  _recordingSection(),
-                InkWell(
-                  onTap: () {
-                    print(_recordProvider.song);
-                    Navigator.of(context).pushNamed('/resultsPage');
-                  },
-                  child: isReceived
-                      ? Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              "See Result!",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                  const SizedBox(
+                    height: 300,
+                  ),
+                  if (!_recordProvider.recordedFilePath.isNotEmpty)
+                    _recordHeading(),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  if (!_recordProvider.recordedFilePath.isNotEmpty)
+                    _recordingSection(),
+                  InkWell(
+                    onTap: () {
+                      print(_recordProvider.song);
+                      Navigator.of(context).pushNamed('/resultsPage');
+                    },
+                    child: isReceived
+                        ? Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                "See Result!",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      : Container(),
-                ),
-                if (_recordProvider.recordedFilePath.isNotEmpty &&
-                    !_playProvider.isSongPlaying)
-                  const SizedBox(height: 40),
-                if (_recordProvider.recordedFilePath.isNotEmpty &&
-                    !_playProvider.isSongPlaying &&
-                    isReceived)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _resetButton(),
-                      const SizedBox(
-                        height: 40,
-                      ),
-                      Text(
-                          'Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),
-                    ],
+                          )
+                        : Container(),
                   ),
+                  if (_recordProvider.recordedFilePath.isNotEmpty &&
+                      !_playProvider.isSongPlaying)
+                    const SizedBox(height: 40),
+                  if (_recordProvider.recordedFilePath.isNotEmpty &&
+                      !_playProvider.isSongPlaying &&
+                      isReceived)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _resetButton(),
+                        const SizedBox(
+                          height: 40,
+                        ),
+                        Text(
+                            'Response Time: ${_recordProvider.responseTime.inSeconds.toString()} seconds'),
+                      ],
+                    ),
 
-                const SizedBox(
-                  height: 40,
-                ),
-                (_recordProvider.recordedFilePath.isNotEmpty && !isReceived)
-                    ? CircularProgressIndicator()
-                    : Text(''),
-                // _resetButton(),
-                // _loadingPage(),
-              ],
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  (_recordProvider.recordedFilePath.isNotEmpty && !isReceived)
+                      ? CircularProgressIndicator()
+                      : Text(''),
+                  // _resetButton(),
+                  // _loadingPage(),
+                ],
+              ),
             )));
   }
 
@@ -131,7 +136,7 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
       child: Text(
         'Record Audio',
         style: TextStyle(
-            fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black),
+            fontSize: 25, fontWeight: FontWeight.w700, color: Colors.black),
       ),
     );
   }

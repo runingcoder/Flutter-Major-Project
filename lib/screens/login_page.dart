@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../components/my_button.dart';
 import '../components/my_textfield.dart';
 import '../components/square_tile.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_services.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -50,23 +50,20 @@ class _LoginPageState extends State<LoginPage> {
 
   // wrong email message popup
   void showErrorMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return  AlertDialog(
-          backgroundColor: Colors.pink,
-          title: Center(
-            child: Text(
-              message,
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        backgroundColor: Colors.pinkAccent,
+      ),
     );
   }
 
-
+  Future<bool> _checkInternetConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +176,20 @@ class _LoginPageState extends State<LoginPage> {
                   children:  [
                     // google button
                     GestureDetector(
-                        onTap: () => AuthService().signInWithGoogle(),
+                        onTap: () async {
+                      if (await _checkInternetConnectivity()) {
+
+                      AuthService().signInWithGoogle();
+                      }else {
+                        // Show a snackbar to notify the user that there is no internet connection
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('No internet connection'),
+                          ),
+                        );
+                      }
+
+                            } ,
                         child: SquareTile(imagePath: 'images/google.png')),
                     //
                     // SizedBox(width: 25),
