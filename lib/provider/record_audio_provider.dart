@@ -133,6 +133,10 @@ class RecordAudioProvider extends ChangeNotifier {
         changeStatus();
       } else {
         print('Error while uploading file');
+        _connectionfail = true;
+        print('conenction fail is ' + _connectionfail.toString());
+
+        notifyListeners();
       }
     } catch (e) {
       print('Error sending post request: $e');
