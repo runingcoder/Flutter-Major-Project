@@ -10,30 +10,37 @@ import 'package:finalmicrophone/services/permission_management.dart';
 import 'package:finalmicrophone/services/toast_services.dart';
 
 class RecordAudioProvider extends ChangeNotifier {
+  bool _connectionfail = false;
 
+  get connectionfail => _connectionfail;
   Duration? _responseTime;
   bool _keepLoading = false;
+
   get keepLoading => _keepLoading;
-  get  responseTime => _responseTime;
 
+  get responseTime => _responseTime;
 
-  void toggleLoading(){
+  void toggleLoading() {
     _keepLoading = true;
   }
+
   final BuildContext context;
-  RecordAudioProvider( this.context);
+
+  RecordAudioProvider(this.context);
+
   Map<String, dynamic> _song = {
     'name': 'Example Song',
-    'indices':'0000',
+    'indices': '0000',
     'city': 'Torronto',
     'url': 'https://www.youtube.com/watch?v=example',
-    'channel_url':'Somthignsdf',
+    'channel_url': 'Somthignsdf',
     'image_url': 'https://example.com/image.png',
   };
   bool _received = false;
+
   get received => _received;
 
-  void changeStatus(){
+  void changeStatus() {
     _received = !_received;
     notifyListeners();
   }
@@ -46,14 +53,14 @@ class RecordAudioProvider extends ChangeNotifier {
   }
 
   final Record _record = Record();
-  bool _isRecording = false;
+    bool _isRecording = false;
   String _afterRecordingFilePath = '';
 
   bool get isRecording => _isRecording;
 
   String get recordedFilePath => _afterRecordingFilePath;
 
-  onWillPop(){
+  onWillPop() {
     _received = false;
     _afterRecordingFilePath = '';
     notifyListeners();
@@ -61,9 +68,15 @@ class RecordAudioProvider extends ChangeNotifier {
 
   clearOldData() {
     _afterRecordingFilePath = '';
-_received= false;
+    _received = false;
+    _connectionfail = false;
     notifyListeners();
   }
+  uploadVoice() async {
+
+
+  }
+
 
   recordVoice() async {
     final _isPermitted = (await PermissionManagement.recordingPermission()) &&
@@ -99,34 +112,38 @@ _received= false;
     _isRecording = false;
     notifyListeners();
     _afterRecordingFilePath = _audioFilePath ?? '';
-      final url = Uri.parse('http://192.168.0.103:90/upload-audio');
+    final url = Uri.parse('http://192.168.0.103:90/upload-audio');
     final file = File(_audioFilePath!);
+    try {
+      final request = http.MultipartRequest('POST', url);
+      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      _responseTime = null;
+      DateTime startTime = DateTime.now();
+      final response = await request.send();
 
-    final request = http.MultipartRequest('POST', url);
-    request.files.add(await http.MultipartFile.fromPath('file', file.path));
-    _responseTime = null;
-    DateTime startTime = DateTime.now();
-    final response = await request.send();
+      if (response.statusCode == 200) {
+        print('File uploaded successfully:');
+        DateTime endTime = DateTime.now();
+        _responseTime = endTime.difference(startTime);
+        notifyListeners();
+        var finalResponse = await response.stream.bytesToString();
+        print('hello there');
+        Map<String, dynamic> useResponse = jsonDecode(finalResponse);
+        setSong(useResponse);
+        changeStatus();
+      } else {
+        print('Error while uploading file');
+      }
+    } catch (e) {
+      print('Error sending post request: $e');
+      _connectionfail = true;
+      print('conenction fail is ' + _connectionfail.toString());
 
-    if (response.statusCode == 200) {
-      print('File uploaded successfully:');
-      DateTime endTime = DateTime.now();
-      _responseTime = endTime.difference(startTime);
       notifyListeners();
-      var finalResponse =  await response.stream.bytesToString();
-      print('hello there');
-      Map<String, dynamic> useResponse = jsonDecode(finalResponse);
-      setSong(useResponse);
-      changeStatus();
-
-
-
-    } else {
-      print('Error while uploading file');
     }
 
     print('Audio file path: $_audioFilePath');
 
-
     notifyListeners();
-  }}
+  }
+}

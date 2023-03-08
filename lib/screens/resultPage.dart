@@ -34,8 +34,8 @@ class _ShazamResultPageState extends State<ShazamResultPage>
     _ycontroller = YoutubePlayerController(
       initialVideoId: videoId!,
       flags: YoutubePlayerFlags(
-        autoPlay: true,
-        mute: true,
+        autoPlay: false,
+        mute: false,
       ),
     );
   }

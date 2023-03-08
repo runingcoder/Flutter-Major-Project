@@ -13,7 +13,6 @@ import '../provider/record_audio_provider.dart';
 import 'package:just_audio/just_audio.dart';
 
 class RecordAndPlayScreen extends StatefulWidget {
-
   const RecordAndPlayScreen({Key? key}) : super(key: key);
 
   @override
@@ -21,34 +20,36 @@ class RecordAndPlayScreen extends StatefulWidget {
 }
 
 class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
-  signUserOut(){
-    FirebaseAuth.instance.signOut();
-  }
+
 
   final user = FirebaseAuth.instance.currentUser!;
+
 // the problem was that the fontsize was big for my email to show.and shouldn't have messed with displayName cs
 //  new users don't seem to have displayName and even if I tried creating/involving that in the register
 //  function, it seems to be deprecated or smthg. Just use email for now.
   //next is to, see, navigation bar, and making a db named history and associating,
   //users with the searched songs. and adding, upload song functionality to send to server.
 
-  late double _height ;
+  late double _height;
+
+
   @override
   Widget build(BuildContext context) {
-
     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
+    bool connectionFail =
+        Provider.of<RecordAudioProvider>(context).connectionfail;
 
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
     final _playProvider = Provider.of<PlayAudioProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
-        ],
-        title: Text('Hello '+ user.email! + ' !' ,
-            style: TextStyle(fontSize: 18, color: Colors.black)),
-      ),
+        appBar: AppBar(
+          actions: [
+            IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
+          ],
+          title: Text('Hello ' + user.email! + ' !',
+              style: TextStyle(fontSize: 18, color: Colors.black)),
+        ),
         backgroundColor: Colors.white,
         body: Container(
             width: MediaQuery.of(context).size.width,
@@ -63,17 +64,67 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                 //this doesn't matter if SIngelChildScrollView is used.
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   const SizedBox(
-                    height: 300,
+                    height: 200,
+                  ),
+                  if (!_recordProvider.recordedFilePath.isNotEmpty && !_recordProvider.isRecording)
+                    _recordHeading('Upload Audio'),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  if (!_recordProvider.recordedFilePath.isNotEmpty && !_recordProvider.isRecording)
+                    _uploadSection(),
+                  const SizedBox(
+                    height: 60,
                   ),
                   if (!_recordProvider.recordedFilePath.isNotEmpty)
-                    _recordHeading(),
+                    _recordHeading('Record Audio'),
                   const SizedBox(
                     height: 40,
                   ),
                   if (!_recordProvider.recordedFilePath.isNotEmpty)
                     _recordingSection(),
+                  if (connectionFail)
+                    SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Could not send request',
+                            style: TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
+                          ),
+                          const SizedBox(height: 80),
+                          GestureDetector(
+                            onTap: () {
+                              Provider.of<RecordAudioProvider>(context,
+                                      listen: false)
+                                  .clearOldData();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'Go back',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   InkWell(
                     onTap: () {
                       print(_recordProvider.song);
@@ -103,6 +154,7 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                   if (_recordProvider.recordedFilePath.isNotEmpty &&
                       !_playProvider.isSongPlaying)
                     const SizedBox(height: 40),
+
                   if (_recordProvider.recordedFilePath.isNotEmpty &&
                       !_playProvider.isSongPlaying &&
                       isReceived)
@@ -121,7 +173,9 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
                   const SizedBox(
                     height: 40,
                   ),
-                  (_recordProvider.recordedFilePath.isNotEmpty && !isReceived)
+                  (_recordProvider.recordedFilePath.isNotEmpty &&
+                          !isReceived &&
+                          !connectionFail)
                       ? CircularProgressIndicator()
                       : Text(''),
                   // _resetButton(),
@@ -130,26 +184,31 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
               ),
             )));
   }
-
-  _recordHeading() {
-    return const Center(
+_uploadSection() {
+  final _recordProvider = Provider.of<RecordAudioProvider>(context);
+  final _recordProviderWithoutListener =
+  Provider.of<RecordAudioProvider>(context, listen: false);
+  return InkWell(
+    onTap: () async => await _recordProviderWithoutListener.uploadVoice(),
+    child: _commonIconSection(Icons.upload, Colors.brown ),
+  );
+}
+  _recordHeading( String messageTime) {
+    return  Center(
       child: Text(
-        'Record Audio',
+        messageTime,
         style: TextStyle(
             fontSize: 25, fontWeight: FontWeight.w700, color: Colors.black),
       ),
     );
   }
 
-  _playAudioHeading() {
-    return const Center(
-      child: Text(
-        'Play Audio',
-        style: TextStyle(
-            fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black),
-      ),
-    );
+
+  signUserOut() {
+    Provider.of<RecordAudioProvider>(context,listen:false).clearOldData();
+    FirebaseAuth.instance.signOut();
   }
+
 
   _recordingSection() {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
@@ -181,20 +240,20 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
     }
     return InkWell(
       onTap: () async => await _recordProviderWithoutListener.recordVoice(),
-      child: _commonIconSection(),
+      child: _commonIconSection(Icons.keyboard_voice_sharp, Colors.green),
     );
   }
 
-  _commonIconSection() {
+  _commonIconSection(IconData iconData, Color color) {
     return Container(
       width: 70,
       height: 70,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xff4BB543),
+        color: color,
         borderRadius: BorderRadius.circular(100),
       ),
-      child: const Icon(Icons.keyboard_voice_rounded,
+      child:  Icon(iconData,
           color: Colors.white, size: 30),
     );
   }
@@ -251,26 +310,6 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
         progressColor: const Color(0xff4BB543),
       ),
     ));
-  }
-
-  _loadingPage() {
-    final _recordProvider = Provider.of<RecordAudioProvider>(context);
-    if (_recordProvider.received) {
-      Navigator.of(context).pushNamed('/resultsPage');
-    }
-
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading...'),
-          ],
-        ),
-      ),
-    );
   }
 
   _resetButton() {
