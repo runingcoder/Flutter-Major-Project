@@ -3,7 +3,7 @@ import 'package:finalmicrophone/screens/login_page.dart';
 import 'package:finalmicrophone/screens/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../screens/record_and_play_audio.dart';
+import '../screens/homePage.dart';
 
 //this is genius.
 //if the user is not logged in, then, we are directed here, and since the showLoginPage is true,

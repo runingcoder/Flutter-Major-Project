@@ -122,6 +122,7 @@ postRequest(String originalPath) async {
   }
 }
   recordVoice() async {
+    print("entered recordVoice");
     final _isPermitted = (await PermissionManagement.recordingPermission()) &&
         (await PermissionManagement.storagePermission());
 

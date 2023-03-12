@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'components/auth_page.dart';
 import 'provider/record_audio_provider.dart';
 import 'provider/play_audio_provider.dart';
-import 'screens/record_and_play_audio.dart';
+import 'screens/homePage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:google_sign_in/google_sign_in.dart';

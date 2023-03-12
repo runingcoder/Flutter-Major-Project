@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../screens/login_or_register.dart';
-import '../screens/record_and_play_audio.dart';
+import '../screens/homePage.dart';
 import '../screens/login_page.dart';
 //checks if user is logged in or not.
 class AuthPage extends StatelessWidget {
