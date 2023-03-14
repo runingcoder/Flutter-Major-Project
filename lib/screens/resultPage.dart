@@ -54,19 +54,26 @@ class _ShazamResultPageState extends State<ShazamResultPage>
           Container(
 
           height: MediaQuery.of(context).size.height * 0.7,
-          width: double.infinity,
+
           decoration: BoxDecoration(
+
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               stops: [0.4, 1.0],
-              colors: [Colors.purple.withOpacity(0.5), Colors.purple.withOpacity(0.6)],
+              colors: [Colors.purple.withOpacity(0.4), Colors.white.withOpacity(0.6)],
             ),
-            image: DecorationImage(
-              image: NetworkImage(widget.image_url),
-              fit: BoxFit.contain,
-            ),
+
+
           ),
+                child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 60),
+                    decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(widget.image_url),
+          fit: BoxFit.contain,
+        ),)
+                )
         ),
 
               Container(
@@ -75,7 +82,7 @@ class _ShazamResultPageState extends State<ShazamResultPage>
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     stops: [0.4, 1.0],
-                    colors: [Colors.cyan.withOpacity(0.5), Colors.purple.withOpacity(0.6)],
+                    colors: [Colors.cyan.withOpacity(0.5), Colors.white.withOpacity(0.6)],
                   ),
 
                 ),
@@ -86,12 +93,23 @@ class _ShazamResultPageState extends State<ShazamResultPage>
                     Text(
                       widget.name_and_artist,
                       style: TextStyle(
-                        fontFamily: 'MycustomFont',
+                        // fontFamily: 'MycustomFont',
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 200),
+                    Center(
+                      child: Text(
+                       'Youtube Player',
+                        style: TextStyle(
+                          // fontFamily: 'MycustomFont',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
                     YoutubePlayer(controller: _ycontroller,
                         showVideoProgressIndicator: true,
                         progressIndicatorColor: Colors.amber,
