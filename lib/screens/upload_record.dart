@@ -63,8 +63,63 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
 //this doesn't matter if SIngelChildScrollView is used.
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Column(
+                children: [
+                    uploadAudioCase? Text(
+                      'Switch IP',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
+                        color: Colors.black,
+                      ),
+                    ): Text(''),
+                    uploadAudioCase?   SizedBox(height: 30): SizedBox(height: 0),
+                    uploadAudioCase?  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _recordProvider.riyanshwifi(),
+                          child: Text(
+                            'Riaynsh Wifi',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Roboto',
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        Icon(Icons.check,
+                            color: _recordProvider.ipLocation == IPLocation.mobileHotspot ? Colors.grey : Colors.green),
+                      ],
+                    ): Text(''),
+                    uploadAudioCase? SizedBox(height: 20): SizedBox(height: 0),
+                    uploadAudioCase?  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _recordProvider.mobilehotspot(),
+                          child: Text(
+                            'Mobile Hotspot',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Roboto',
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        Icon(Icons.check,
+                            color: _recordProvider.ipLocation == IPLocation.mobileHotspot ? Colors.green : Colors.grey),
+                      ],
+                    ): Text(''),
+                  ]
+                ),
+
                 const SizedBox(
-                  height: 200,
+                  height: 100,
                 ),
                 if (uploadAudioCase) _recordHeading('Upload Audio'),
                 const SizedBox(

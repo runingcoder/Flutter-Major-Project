@@ -12,9 +12,28 @@ import 'package:finalmicrophone/services/toast_services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
-
+enum IPLocation {
+  mobileHotspot,
+  riyanshWifi,
+}
 class RecordAudioProvider extends ChangeNotifier {
-  final url = Uri.parse('http://192.168.0.103:90/upload-audio');
+  IPLocation _ipLocation = IPLocation.riyanshWifi;
+
+  IPLocation get ipLocation => _ipLocation;
+  String _ipaddress = 'http://192.168.0.103:90/upload-audio';
+  get ipaddress => _ipaddress;
+
+mobilehotspot () {
+  _ipLocation = IPLocation.mobileHotspot;
+  _ipaddress = 'http://192.168.165.13:90/upload-audio';
+  notifyListeners();
+}
+
+  riyanshwifi () {
+    _ipLocation = IPLocation.riyanshWifi;
+    _ipaddress = 'http://192.168.0.103:90/upload-audio';
+    notifyListeners();
+  }
   bool _connectionfail = false;
   bool _uploadStatus = false;
   get uploadStatus => _uploadStatus;
@@ -81,10 +100,16 @@ class RecordAudioProvider extends ChangeNotifier {
     notifyListeners();
   }
 postRequest(String originalPath) async {
+  //  could user ping discover network to know if a particular ip and port is available or not
+  //so that we can quickly set connectionfail =true when we set ipaddress that's unavailable.
+  //so, for now, I am only doing a simple work, just shifting the ip address whenever I shift.
+  //won't click unavailable ip to avoid crashing or loading too much.
   try {
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.0.103:90/upload-audio'),
+
+      Uri.parse(_ipaddress),
+
     );
     final audioFileField =
         await http.MultipartFile.fromPath('file', originalPath!);

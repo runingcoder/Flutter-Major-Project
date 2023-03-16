@@ -1,5 +1,6 @@
 import 'package:finalmicrophone/screens/favourites.dart';
 import 'package:finalmicrophone/screens/history.dart';
+import 'package:finalmicrophone/screens/switchIP.dart';
 import 'package:finalmicrophone/screens/upload_record.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -44,12 +45,13 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
 
               duration: Duration(milliseconds: 300),
               //
-              padding: EdgeInsets.all(19),
+              padding: EdgeInsets.all(15),
               tabs: [
                 GButton(
                   icon: Icons.home,
                   text: 'Home',
                 ),
+
                 GButton(
                   icon: Icons.history,
                   text: 'History',

@@ -41,7 +41,6 @@ class _ShazamResultPageState extends State<ShazamResultPage>
   }
   @override
   Widget build(BuildContext context) {
-    final _recordProvider = Provider.of<RecordAudioProvider>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
