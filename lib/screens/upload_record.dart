@@ -28,16 +28,24 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     super.initState();
   }
 callUser() async {
-  late DocumentSnapshot doc;
-  final docRef = FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid!);
-  doc = await docRef.get();
-  final data = doc.data() as Map<String, dynamic>;
-  print('data is ');
-  print(data);
-  screenName = data['first name'];
-if(screenName == null){
-  screenName = FirebaseAuth.instance.currentUser!.displayName;
-}
+  if (FirebaseAuth.instance.currentUser!.displayName != null) {
+    setState(() {
+      screenName =FirebaseAuth.instance.currentUser!.displayName!.split(" ")[0];
+
+    });
+
+  }
+  else {
+    late DocumentSnapshot doc;
+    final docRef = FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid!);
+    doc = await docRef.get();
+    final data = doc.data() as Map<String, dynamic>;
+    setState(() {
+      screenName = data['first name'];
+    });
+
+
+  }
 }
 
   @override
@@ -70,7 +78,7 @@ if(screenName == null){
         'https://images.unsplash.com/photo-1550895030-823330fc2551?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hello ${screenName} !',
+        title: Text('Hello ${ screenName   }  !',
             style: TextStyle(fontSize: 18, color: Colors.white)),
       ),
       backgroundColor: Colors.white,
