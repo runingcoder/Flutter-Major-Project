@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MyTextField extends StatelessWidget {
   final controller;
   final String hintText;
   final bool obscureText;
+  final String autofill;
 
   const MyTextField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
+    required this.autofill,
   });
 
   @override
@@ -17,10 +20,11 @@ class MyTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: TextField(
-        autofillHints: [AutofillHints.email],
+        autofillHints: [autofill],
         keyboardType: TextInputType.emailAddress,
         controller: controller,
         obscureText: obscureText,
+          onEditingComplete: ()=> TextInput.finishAutofillContext(),
         decoration: InputDecoration(
             enabledBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.white),

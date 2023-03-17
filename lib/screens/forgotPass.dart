@@ -68,6 +68,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 controller: _emailController,
                 hintText: 'Email',
                 obscureText: false,
+                autofill: AutofillHints.email,
               ),
               const SizedBox(height: 55),
               MyButton(onTap: resetpassword, name: "Reset Password", color: Colors.deepPurple.shade400),

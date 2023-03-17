@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalmicrophone/screens/resultPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,20 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
+  void _openResultsPage(BuildContext context, QueryDocumentSnapshot<Map<String, dynamic>> songData ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ShazamResultPage(
+          name_and_artist: songData['nameAndArtist'].toString(),
+          url:  songData['url'].toString(),
+          image_url:  songData['imageUrl'].toString(),
+          channel_url:  songData['channelUrl'].toString(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final String uid = FirebaseAuth.instance.currentUser!.uid!;
@@ -39,13 +54,24 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return CircularProgressIndicator();
+                    return Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.0,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                    );
                   }
 
                   final docs = snapshot.data!.docs;
 
                   if (docs.isEmpty) {
-                    return Text('No favorites yet.');
+                    return Center(
+                      child: Text('No favorites yet.', style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                      ),),
+                    );
                   }
 
                   return ListView.builder(
@@ -66,6 +92,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         padding: EdgeInsets.all(15),
                         margin: EdgeInsets.symmetric(vertical: 4.0),
                         child: ListTile(
+                          onTap: () async {
+                            print(doc['songName']);
+                            var requiredSong = await FirebaseFirestore.instance.collection('users').doc(uid)
+                                .collection('songs')
+                                .where('nameAndArtist', isEqualTo: songName)
+                                .limit(1).get();
+                            var songData = requiredSong.docs.first;
+                            _openResultsPage(context, songData);
+                          } ,
                           title: Text(songName, style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,

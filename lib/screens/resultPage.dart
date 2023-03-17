@@ -53,8 +53,7 @@ class _ShazamResultPageState extends State<ShazamResultPage>
 
     return Scaffold(
       appBar: AppBar(
-        brightness: Brightness.dark,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.pink.shade100,
         elevation: 0,
         // your other app bar properties go here
       ),

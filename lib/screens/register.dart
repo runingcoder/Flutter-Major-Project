@@ -102,147 +102,157 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 50),
+            child: AutofillGroup(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 50),
 
-                // logo
-                const Icon(
-                  Icons.app_registration,
-                  color: Colors.deepPurple,
-                  size: 50,
-                ),
-
-                const SizedBox(height: 50),
-
-                // welcome back, you've been missed!
-                Text(
-                  'Time to sign you up!',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 16,
+                  // logo
+                  const Icon(
+                    Icons.app_registration,
+                    color: Colors.deepPurple,
+                    size: 50,
                   ),
-                ),
-                const SizedBox(height: 25),
-                // username textfield
-                MyTextField(
-                  controller: _firstNameContoller,
-                  hintText: 'First Name',
-                  obscureText: false,
-                ),
-                const SizedBox(height: 10),
-                // username textfield
-                MyTextField(
-                  controller: _lastNameController,
-                  hintText: 'Last name',
-                  obscureText: false,
-                ),
-                const SizedBox(height: 10),
-                // username textfield
-                MyTextField(
-                  controller: emailController,
-                  hintText: 'Email',
-                  obscureText: false,
-                ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 50),
 
-                // password textfield
-                MyTextField(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
-                const SizedBox(height: 10),
+                  // welcome back, you've been missed!
+                  Text(
+                    'Time to sign you up!',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  // username textfield
+                  MyTextField(
+                    controller: _firstNameContoller,
+                    hintText: 'First Name',
+                    obscureText: false,
+                    autofill: AutofillHints.givenName,
+                  ),
+                  const SizedBox(height: 10),
+                  // username textfield
+                  MyTextField(
+                    controller: _lastNameController,
+                    hintText: 'Last name',
+                    obscureText: false,
+                    autofill: AutofillHints.familyName,
+                  ),
+                  const SizedBox(height: 10),
+                  // username textfield
+                  MyTextField(
+                    controller: emailController,
+                    hintText: 'Email',
+                    obscureText: false,
+                    autofill: AutofillHints.email,
 
-                // password textfield
-                MyTextField(
-                  controller: confirmpasswordController,
-                  hintText: 'Confirm Password',
-                  obscureText: true,
-                ),
+                  ),
 
-                const SizedBox(height: 25),
+                  const SizedBox(height: 10),
 
-                // sign in button
-                MyButton(
-                    onTap: signUserUp,
-                    name: "Sign Up",
-                    color: Colors.deepPurple.shade400),
+                  // password textfield
+                  MyTextField(
+                    controller: passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                    autofill: AutofillHints.password,
 
-                const SizedBox(height: 50),
+                  ),
+                  const SizedBox(height: 10),
 
-                // or continue with
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
+                  // password textfield
+                  MyTextField(
+                    controller: confirmpasswordController,
+                    hintText: 'Confirm Password',
+                    obscureText: true,
+                    autofill: AutofillHints.password,
+
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // sign in button
+                  MyButton(
+                      onTap: signUserUp,
+                      name: "Sign Up",
+                      color: Colors.deepPurple.shade400),
+
+                  const SizedBox(height: 50),
+
+                  // or continue with
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            thickness: 0.5,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(
+                            'Or continue with',
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            thickness: 0.5,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  // google + apple sign in buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.grey[400],
-                        ),
+                      // google button
+                      GestureDetector(
+                          onTap: () => AuthService().signInWithGoogle(),
+                          child: SquareTile(imagePath: 'images/google.png')),
+                      //
+                      // SizedBox(width: 25),
+                      //
+                      // // apple button
+                      // SquareTile(imagePath: 'images/apple.png')
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // not a member? register now
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Already have an account?',
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          'Or continue with',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.grey[400],
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: widget.onTap,
+                        child: const Text(
+                          'Log In',
+                          style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-
-                const SizedBox(height: 50),
-
-                // google + apple sign in buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // google button
-                    GestureDetector(
-                        onTap: () => AuthService().signInWithGoogle(),
-                        child: SquareTile(imagePath: 'images/google.png')),
-                    //
-                    // SizedBox(width: 25),
-                    //
-                    // // apple button
-                    // SquareTile(imagePath: 'images/apple.png')
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                // not a member? register now
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account?',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(
-                          color: Colors.blueAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

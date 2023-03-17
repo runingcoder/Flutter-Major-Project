@@ -7,6 +7,7 @@ import '../components/customBorder.dart';
 import '../provider/play_audio_provider.dart';
 import '../provider/record_audio_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UploadAndRecord extends StatefulWidget {
   const UploadAndRecord({Key? key}) : super(key: key);
@@ -16,16 +17,21 @@ class UploadAndRecord extends StatefulWidget {
 }
 
 class _UploadAndRecordState extends State<UploadAndRecord> {
-  late DocumentSnapshot _docSnapshot;
+  final String uid = FirebaseAuth.instance.currentUser!.uid!;
+
+  Future<void>? _callUserFuture;
   String? screenName = '';
 
   // final user = FirebaseAuth.instance.currentUser!;
-
   @override
   void initState() {
-    callUser();
+    _callUserFuture = callUser();
+
     super.initState();
   }
+
+  //can't fetch logged in user after opening app after closing if non -google user is signed in.
+  //aru ta kaam chalirekei cha.
 
   callUser() async {
     if (FirebaseAuth.instance.currentUser!.displayName != null) {
@@ -47,16 +53,13 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
   }
 
   Future<void> addSongToHistory(String songName, bool isFavorite) async {
-    final String uid = FirebaseAuth.instance.currentUser!.uid!;
     final historyRef = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection('history');
 
-    final querySnapshot = await historyRef
-        .where('songName', isEqualTo: songName)
-        .limit(1)
-        .get();
+    final querySnapshot =
+        await historyRef.where('songName', isEqualTo: songName).limit(1).get();
 
     if (querySnapshot.docs.isNotEmpty) {
       final doc = querySnapshot.docs.first;
@@ -69,15 +72,43 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
       });
     }
   }
+  Future<void> addSongToUser(String nameAndArtist, String url, String imageUrl, String channelUrl) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final songsRef = userRef.collection('songs');
+
+    // check if song already exists
+    final querySnapshot =  await songsRef.where('nameAndArtist', isEqualTo: nameAndArtist).limit(1).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+     print('this song is already available');
+
+    }
+    else{
+      await songsRef.add({
+        'nameAndArtist': nameAndArtist,
+        'url': url,
+        'imageUrl': imageUrl,
+        'channelUrl': channelUrl,
+      });
+    }
+
+    // song does not exist, add to collection
+
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
+    print('eadf');
+    print(screenName);
+
     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
     bool connectionFail =
         Provider.of<RecordAudioProvider>(context).connectionfail;
 
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
+
     final _playProvider = Provider.of<PlayAudioProvider>(context);
     bool isRecordingInProgress = _recordProvider.recordedFilePath.isNotEmpty &&
         !isReceived &&
@@ -99,172 +130,150 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         !connectionFail;
     String imageUrlBG =
         'https://images.unsplash.com/photo-1550895030-823330fc2551?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hello ${screenName}  !',
-            style: TextStyle(fontSize: 18, color: Colors.white)),
-      ),
-      backgroundColor: Colors.white,
-      body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  fit: BoxFit.cover, image: NetworkImage(imageUrlBG))),
-          child: SingleChildScrollView(
-            child: Column(
-//this doesn't matter if SIngelChildScrollView is used.
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Visibility(
-                  visible: uploadAudioCase,
-                  child: Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: UnicornOutlineButton(
-                      strokeWidth: 2,
-                      radius: 24,
-                      gradient: LinearGradient(
-                          colors: [Colors.black, Colors.redAccent]),
-                      onPressed: () {},
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Switch IP',
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Roboto',
-                                  color: Colors.black,
-                                ),
-                              ),
-                              SizedBox(height: 30),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => _recordProvider.riyanshwifi(),
-                                    child: Text(
-                                      'Riyansh Wifi',
+
+    return FutureBuilder<void>(
+      future: _callUserFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              title: Text('Hello there ${screenName}!',
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
+            ),
+            backgroundColor: Colors.white,
+            body: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        fit: BoxFit.cover, image: NetworkImage(imageUrlBG))),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Visibility(
+                        visible: uploadAudioCase,
+                        child: Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: UnicornOutlineButton(
+                            strokeWidth: 2,
+                            radius: 24,
+                            gradient: LinearGradient(
+                                colors: [Colors.black, Colors.redAccent]),
+                            onPressed: () => {},
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 15),
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Switch IP',
                                       style: TextStyle(
-                                        fontSize: 20,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
                                         fontFamily: 'Roboto',
                                         color: Colors.black,
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(width: 20),
-                                  Icon(Icons.check,
-                                      color: _recordProvider.ipLocation ==
-                                              IPLocation.mobileHotspot
-                                          ? Colors.white
-                                          : Colors.purple),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () =>
-                                        _recordProvider.mobilehotspot(),
-                                    child: Text(
-                                      'Mobile Hotspot',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Roboto',
-                                        color: Colors.black,
-                                      ),
+                                    SizedBox(height: 30),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.riyanshwifi(),
+                                          child: Text(
+                                            'Riyansh Wifi',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                    IPLocation.mobileHotspot
+                                                ? Colors.white
+                                                : Colors.purple),
+                                      ],
                                     ),
-                                  ),
-                                  SizedBox(width: 20),
-                                  Icon(Icons.check,
-                                      color: _recordProvider.ipLocation ==
-                                              IPLocation.mobileHotspot
-                                          ? Colors.purple
-                                          : Colors.white),
-                                ],
-                              ),
-                            ]),
+                                    SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.mobilehotspot(),
+                                          child: Text(
+                                            'Mobile Hotspot',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                    IPLocation.mobileHotspot
+                                                ? Colors.purple
+                                                : Colors.white),
+                                      ],
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
 
-                const SizedBox(
-                  height: 30,
-                ),
-                if (uploadAudioCase) _recordHeading('Upload Audio'),
-                const SizedBox(
-                  height: 40,
-                ),
-                if (uploadAudioCase) _uploadSection(),
-                const SizedBox(
-                  height: 60,
-                ),
-                if (recordAudioCase) _recordHeading('Record Audio'),
-                const SizedBox(
-                  height: 40,
-                ),
-                if (recordAudioCase) _recordingSection(),
-                if (connectionFail) afterConnectionFail(),
-                afterReceived(),
-                const SizedBox(height: 40),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      if (uploadAudioCase) _recordHeading('Upload Audio'),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      if (uploadAudioCase) _uploadSection(),
+                      const SizedBox(
+                        height: 60,
+                      ),
+                      if (recordAudioCase) _recordHeading('Record Audio'),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      if (recordAudioCase) _recordingSection(),
+                      if (connectionFail) afterConnectionFail(),
+                      afterReceived(),
+                      const SizedBox(height: 40),
 
-                if (resultAfterRecording) ResultColumn(),
-                if (resultAfterUploading) ResultColumn(),
-                const SizedBox(
-                  height: 40,
-                ),
-                if (isRecordingInProgress) CircularProgressIndicator(),
-                if (!isRecordingInProgress) Text(''),
-                if (isUploadingInProgress) CircularProgressIndicator(),
-                if (!isUploadingInProgress) Text(''),
+                      if (resultAfterRecording) ResultColumn(),
+                      if (resultAfterUploading) ResultColumn(),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      if (isRecordingInProgress) CircularProgressIndicator(),
+                      if (!isRecordingInProgress) Text(''),
+                      if (isUploadingInProgress) CircularProgressIndicator(),
+                      if (!isUploadingInProgress) Text(''),
 
 // _resetButton(),
 // _loadingPage(),
-              ],
-            ),
-          )),
+                    ],
+                  ),
+                )),
+          );
+        }
+      },
     );
   }
-
-// loadingRequest(){
-//   final _recordProvider = Provider.of<RecordAudioProvider>(context);
-//
-//   return Column(
-//     mainAxisAlignment: MainAxisAlignment.center,
-//     children: [
-//       CircularProgressIndicator(),
-//       const SizedBox(
-//         height: 40,
-//       ),
-//       GestureDetector(
-//         onTap: () {
-//           Provider.of<RecordAudioProvider>(context, listen: false)
-//               .clearOldData();
-//         },
-//         child: Container(
-//           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//           decoration: BoxDecoration(
-//             color: Colors.blue,
-//             borderRadius: BorderRadius.circular(10),
-//           ),
-//           child: Text(
-//             'Cancel search',
-//             style: TextStyle(
-//               fontSize: 18,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.white,
-//             ),
-//           ),
-//         ),
-//       ),
-//     ],
-//   );
-// }
 
   afterConnectionFail() {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
@@ -316,7 +325,8 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         print(_recordProvider.song);
         //send history collection data with taping in the see results page.
         addSongToHistory(_recordProvider.song['name'], false);
-
+        print('reached hrere>');
+        addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['channel_url']);
         Navigator.of(context).pushNamed('/resultsPage');
       },
       child: _recordProvider.received
