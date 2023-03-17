@@ -21,8 +21,8 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
   int _selectedIndex = 0;
   static List<Widget> _widgetOptions = <Widget>[
     UploadAndRecord(),
-    HistoryPage(),
-    FavouritesPage(),
+    HistoryList(),
+    FavoritesPage(),
 
   ];
 

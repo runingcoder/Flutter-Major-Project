@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:provider/provider.dart';
+import '../components/customBorder.dart';
 import '../provider/play_audio_provider.dart';
 import '../provider/record_audio_provider.dart';
 import 'package:http/http.dart' as http;
-
 
 class UploadAndRecord extends StatefulWidget {
   const UploadAndRecord({Key? key}) : super(key: key);
@@ -17,36 +17,59 @@ class UploadAndRecord extends StatefulWidget {
 
 class _UploadAndRecordState extends State<UploadAndRecord> {
   late DocumentSnapshot _docSnapshot;
-   String? screenName = '';
+  String? screenName = '';
 
   // final user = FirebaseAuth.instance.currentUser!;
 
-
-@override
-  void initState()  {
-  callUser();
+  @override
+  void initState() {
+    callUser();
     super.initState();
   }
-callUser() async {
-  if (FirebaseAuth.instance.currentUser!.displayName != null) {
-    setState(() {
-      screenName =FirebaseAuth.instance.currentUser!.displayName!.split(" ")[0];
 
-    });
-
+  callUser() async {
+    if (FirebaseAuth.instance.currentUser!.displayName != null) {
+      setState(() {
+        screenName =
+            FirebaseAuth.instance.currentUser!.displayName!.split(" ")[0];
+      });
+    } else {
+      late DocumentSnapshot doc;
+      final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid!);
+      doc = await docRef.get();
+      final data = doc.data() as Map<String, dynamic>;
+      setState(() {
+        screenName = data['first name'];
+      });
+    }
   }
-  else {
-    late DocumentSnapshot doc;
-    final docRef = FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid!);
-    doc = await docRef.get();
-    final data = doc.data() as Map<String, dynamic>;
-    setState(() {
-      screenName = data['first name'];
-    });
 
+  Future<void> addSongToHistory(String songName, bool isFavorite) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid!;
+    final historyRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('history');
 
+    final querySnapshot = await historyRef
+        .where('songName', isEqualTo: songName)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final doc = querySnapshot.docs.first;
+      await doc.reference.update({'isFavorite': isFavorite});
+    } else {
+      await historyRef.add({
+        'songName': songName,
+        'isFavorite': isFavorite,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
   }
-}
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,16 +96,15 @@ callUser() async {
         !connectionFail;
     bool recordAudioCase = !_recordProvider.uploadStatus &&
         !_recordProvider.recordedFilePath.isNotEmpty &&
-        !connectionFail ;
+        !connectionFail;
     String imageUrlBG =
         'https://images.unsplash.com/photo-1550895030-823330fc2551?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hello ${ screenName   }  !',
+        title: Text('Hello ${screenName}  !',
             style: TextStyle(fontSize: 18, color: Colors.white)),
       ),
       backgroundColor: Colors.white,
-
       body: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -94,63 +116,85 @@ callUser() async {
 //this doesn't matter if SIngelChildScrollView is used.
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                children: [
-                    uploadAudioCase? Text(
-                      'Switch IP',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Roboto',
-                        color: Colors.black,
+                Visibility(
+                  visible: uploadAudioCase,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: UnicornOutlineButton(
+                      strokeWidth: 2,
+                      radius: 24,
+                      gradient: LinearGradient(
+                          colors: [Colors.black, Colors.redAccent]),
+                      onPressed: () {},
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Switch IP',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Roboto',
+                                  color: Colors.black,
+                                ),
+                              ),
+                              SizedBox(height: 30),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _recordProvider.riyanshwifi(),
+                                    child: Text(
+                                      'Riyansh Wifi',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontFamily: 'Roboto',
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  Icon(Icons.check,
+                                      color: _recordProvider.ipLocation ==
+                                              IPLocation.mobileHotspot
+                                          ? Colors.white
+                                          : Colors.purple),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () =>
+                                        _recordProvider.mobilehotspot(),
+                                    child: Text(
+                                      'Mobile Hotspot',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontFamily: 'Roboto',
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  Icon(Icons.check,
+                                      color: _recordProvider.ipLocation ==
+                                              IPLocation.mobileHotspot
+                                          ? Colors.purple
+                                          : Colors.white),
+                                ],
+                              ),
+                            ]),
                       ),
-                    ): Text(''),
-                    uploadAudioCase?   SizedBox(height: 30): SizedBox(height: 0),
-                    uploadAudioCase?  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _recordProvider.riyanshwifi(),
-                          child: Text(
-                            'Riaynsh Wifi',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: 'Roboto',
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        Icon(Icons.check,
-                            color: _recordProvider.ipLocation == IPLocation.mobileHotspot ? Colors.grey : Colors.green),
-                      ],
-                    ): Text(''),
-                    uploadAudioCase? SizedBox(height: 20): SizedBox(height: 0),
-                    uploadAudioCase?  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _recordProvider.mobilehotspot(),
-                          child: Text(
-                            'Mobile Hotspot',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: 'Roboto',
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        Icon(Icons.check,
-                            color: _recordProvider.ipLocation == IPLocation.mobileHotspot ? Colors.green : Colors.grey),
-                      ],
-                    ): Text(''),
-                  ]
+                    ),
+                  ),
                 ),
 
                 const SizedBox(
-                  height: 100,
+                  height: 30,
                 ),
                 if (uploadAudioCase) _recordHeading('Upload Audio'),
                 const SizedBox(
@@ -186,6 +230,7 @@ callUser() async {
           )),
     );
   }
+
 // loadingRequest(){
 //   final _recordProvider = Provider.of<RecordAudioProvider>(context);
 //
@@ -262,44 +307,50 @@ callUser() async {
       ),
     );
   }
+
   afterReceived() {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
 
     return InkWell(
       onTap: () {
         print(_recordProvider.song);
+        //send history collection data with taping in the see results page.
+        addSongToHistory(_recordProvider.song['name'], false);
+
         Navigator.of(context).pushNamed('/resultsPage');
       },
       child: _recordProvider.received
           ? Container(
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            "See Result!",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-        ),
-      )
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  "See Result!",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            )
           : Container(),
     );
   }
+
   _uploadSection() {
     final _recordProviderWithoutListener =
-    Provider.of<RecordAudioProvider>(context, listen: false);
+        Provider.of<RecordAudioProvider>(context, listen: false);
     return InkWell(
       onTap: () async => await _recordProviderWithoutListener.uploadAudio(),
       child: _commonIconSection(Icons.upload, Colors.brown),
     );
   }
+
   _recordHeading(String messageTime) {
     return Center(
       child: Text(
@@ -309,6 +360,7 @@ callUser() async {
       ),
     );
   }
+
   ResultColumn() {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
 
@@ -328,7 +380,7 @@ callUser() async {
   _recordingSection() {
     final _recordProvider = Provider.of<RecordAudioProvider>(context);
     final _recordProviderWithoutListener =
-    Provider.of<RecordAudioProvider>(context, listen: false);
+        Provider.of<RecordAudioProvider>(context, listen: false);
     if (_recordProvider.isRecording) {
       return InkWell(
         onTap: () async => await _recordProviderWithoutListener.stopRecording(),
@@ -358,6 +410,7 @@ callUser() async {
       child: _commonIconSection(Icons.keyboard_voice_sharp, Colors.green),
     );
   }
+
   _commonIconSection(IconData iconData, Color color) {
     return Container(
       width: 70,
@@ -370,9 +423,10 @@ callUser() async {
       child: Icon(iconData, color: Colors.white, size: 30),
     );
   }
+
   _resetButton() {
     final _recordProvider =
-    Provider.of<RecordAudioProvider>(context, listen: false);
+        Provider.of<RecordAudioProvider>(context, listen: false);
 
     return InkWell(
       onTap: () => _recordProvider.clearOldData(),

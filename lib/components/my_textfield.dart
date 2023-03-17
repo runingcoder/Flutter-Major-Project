@@ -17,6 +17,7 @@ class MyTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: TextField(
+        autofillHints: [AutofillHints.email],
         keyboardType: TextInputType.emailAddress,
         controller: controller,
         obscureText: obscureText,

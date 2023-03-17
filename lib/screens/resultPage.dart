@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../provider/record_audio_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class ShazamResultPage extends StatefulWidget {
@@ -25,7 +27,14 @@ class ShazamResultPage extends StatefulWidget {
 class _ShazamResultPageState extends State<ShazamResultPage>
    {
 
-  late YoutubePlayerController  _ycontroller;
+
+
+
+// Create a new history document for the current user
+
+
+
+     late YoutubePlayerController  _ycontroller;
 
   @override
   void initState() {
@@ -43,6 +52,13 @@ class _ShazamResultPageState extends State<ShazamResultPage>
   Widget build(BuildContext context) {
 
     return Scaffold(
+      appBar: AppBar(
+        brightness: Brightness.dark,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        // your other app bar properties go here
+      ),
+
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
