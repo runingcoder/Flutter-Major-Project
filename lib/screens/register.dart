@@ -1,14 +1,16 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/my_button.dart';
 import '../components/my_textfield.dart';
 import '../components/square_tile.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../services/auth_services.dart';
 
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
+
   RegisterPage({super.key, required this.onTap});
 
   @override
@@ -17,9 +19,10 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   // text editing controllers
-  final emailController = TextEditingController();
-  final nameController = TextEditingController();
 
+  final emailController = TextEditingController();
+  final _firstNameContoller = TextEditingController();
+  final _lastNameController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmpasswordController = TextEditingController();
 
@@ -42,13 +45,17 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
     try {
-
-      UserCredential result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      //create user
+      UserCredential result =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
-      User user = FirebaseAuth.instance.currentUser!;
-      user.updateDisplayName(nameController.text);
+
+      String uid = result.user!.uid;
+
+      //add userdetails
+      addUserDetails(_firstNameContoller.text.trim(), _lastNameController.text.trim(), emailController.text.trim(), uid);
 
       // pop the loading circle
       Navigator.pop(context);
@@ -60,12 +67,21 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  Future addUserDetails(String firstname, String lastname, String email, String uid) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'first name': firstname,
+      'last name' : lastname,
+      'email' : email,
+      'uid': uid,
+    });
+  }
+
   // wrong email message popup
   void showErrorMessage(String message) {
     showDialog(
       context: context,
       builder: (context) {
-        return  AlertDialog(
+        return AlertDialog(
           backgroundColor: Colors.pink,
           title: Center(
             child: Text(
@@ -77,8 +93,6 @@ class _RegisterPageState extends State<RegisterPage> {
       },
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -95,8 +109,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 // logo
                 const Icon(
-                  Icons.lock,
-                  color: Colors.brown,
+                  Icons.app_registration,
+                  color: Colors.deepPurple,
                   size: 50,
                 ),
 
@@ -111,6 +125,20 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 25),
+                // username textfield
+                MyTextField(
+                  controller: _firstNameContoller,
+                  hintText: 'First Name',
+                  obscureText: false,
+                ),
+                const SizedBox(height: 10),
+                // username textfield
+                MyTextField(
+                  controller: _lastNameController,
+                  hintText: 'Last name',
+                  obscureText: false,
+                ),
+                const SizedBox(height: 10),
                 // username textfield
                 MyTextField(
                   controller: emailController,
@@ -135,15 +163,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   obscureText: true,
                 ),
 
-
-
                 const SizedBox(height: 25),
 
                 // sign in button
                 MyButton(
-                  onTap: signUserUp,
-                  name: "Sign Up"
-                ),
+                    onTap: signUserUp,
+                    name: "Sign Up",
+                    color: Colors.deepPurple.shade400),
 
                 const SizedBox(height: 50),
 

@@ -5,6 +5,9 @@ import '../components/my_textfield.dart';
 import '../components/square_tile.dart';
 import '../services/auth_services.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'forgotPass.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -80,8 +83,8 @@ class _LoginPageState extends State<LoginPage> {
 
                 // logo
                 const Icon(
-                  Icons.lock,
-                  color: Colors.brown,
+                  Icons.bolt,
+                  color: Colors.deepPurple,
                   size: 100,
                 ),
 
@@ -117,16 +120,28 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 10),
 
                 // forgot password?
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context){
+                      return ForgotPasswordPage();
+                    },
+                    ),);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -135,7 +150,8 @@ class _LoginPageState extends State<LoginPage> {
                 // sign in button
                 MyButton(
                   onTap: signUserIn,
-                  name: "Sign In"
+                  name: "Sign In",
+                  color: Colors.deepPurple.shade400
                 ),
 
                 const SizedBox(height: 50),

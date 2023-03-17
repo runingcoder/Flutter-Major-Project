@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
@@ -15,10 +16,32 @@ class UploadAndRecord extends StatefulWidget {
 }
 
 class _UploadAndRecordState extends State<UploadAndRecord> {
+  late DocumentSnapshot _docSnapshot;
+   String? screenName = '';
+
+  // final user = FirebaseAuth.instance.currentUser!;
+
+
+@override
+  void initState()  {
+  callUser();
+    super.initState();
+  }
+callUser() async {
+  late DocumentSnapshot doc;
+  final docRef = FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid!);
+  doc = await docRef.get();
+  final data = doc.data() as Map<String, dynamic>;
+  print('data is ');
+  print(data);
+  screenName = data['first name'];
+if(screenName == null){
+  screenName = FirebaseAuth.instance.currentUser!.displayName;
+}
+}
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
     bool connectionFail =
         Provider.of<RecordAudioProvider>(context).connectionfail;
@@ -47,7 +70,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         'https://images.unsplash.com/photo-1550895030-823330fc2551?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hello ' + user.email! + ' !',
+        title: Text('Hello ${screenName} !',
             style: TextStyle(fontSize: 18, color: Colors.white)),
       ),
       backgroundColor: Colors.white,
