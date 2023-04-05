@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
@@ -154,6 +155,12 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // ElevatedButton(onPressed: (){
+                      //   Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(builder: (context) =>  SongPage()),
+                      //   );
+                      // } , child: Text('SongsPage')),
                       Visibility(
                         visible: uploadAudioCase,
                         child: Padding(
@@ -181,6 +188,31 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                                     SizedBox(height: 30),
                                     Row(
                                       mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.serverIP(),
+                                          child: Text(
+                                            'Server Connect',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                IPLocation.serverIP
+                                                ? Colors.purple
+                                                : Colors.white),
+                                      ],
+                                    ),
+                                    SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         GestureDetector(
@@ -198,9 +230,34 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                                         SizedBox(width: 20),
                                         Icon(Icons.check,
                                             color: _recordProvider.ipLocation ==
-                                                    IPLocation.mobileHotspot
-                                                ? Colors.white
-                                                : Colors.purple),
+                                                    IPLocation.riyanshWifi
+                                                ? Colors.purple
+                                                : Colors.white),
+                                      ],
+                                    ),
+                                    SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.NDMwifi(),
+                                          child: Text(
+                                            'NDM Wifi',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                IPLocation.NDMwifi
+                                                ? Colors.purple
+                                                : Colors.white),
                                       ],
                                     ),
                                     SizedBox(height: 20),
@@ -327,7 +384,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         addSongToHistory(_recordProvider.song['name'], false);
         print('reached hrere>');
         addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['channel_url']);
-        Navigator.of(context).pushNamed('/resultsPage');
+          Navigator.of(context).pushNamed('/songPage');
       },
       child: _recordProvider.received
           ? Container(

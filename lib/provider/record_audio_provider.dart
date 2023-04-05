@@ -10,11 +10,13 @@ import 'package:finalmicrophone/services/storage_management.dart';
 import 'package:finalmicrophone/services/permission_management.dart';
 import 'package:finalmicrophone/services/toast_services.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
+
 enum IPLocation {
   mobileHotspot,
   riyanshWifi,
+  serverIP,
+  NDMwifi
+
 }
 class RecordAudioProvider extends ChangeNotifier {
 
@@ -30,12 +32,23 @@ mobilehotspot () {
   _ipaddress = 'http://192.168.165.13:90/upload-audio';
   notifyListeners();
 }
+serverIP() {
+    _ipLocation = IPLocation.serverIP;
+    _ipaddress = 'http://3.225.21.221:90/upload-audio';
+    notifyListeners();
+  }
 
   riyanshwifi () {
     _ipLocation = IPLocation.riyanshWifi;
     _ipaddress = 'http://192.168.0.103:90/upload-audio';
     notifyListeners();
   }
+  NDMwifi () {
+    _ipLocation = IPLocation.NDMwifi;
+    _ipaddress = 'http://192.168.1.14:90/upload-audio';
+    notifyListeners();
+  }
+
   bool _connectionfail = false;
   bool _uploadStatus = false;
   get uploadStatus => _uploadStatus;

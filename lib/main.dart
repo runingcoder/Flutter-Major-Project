@@ -1,4 +1,4 @@
-import 'package:finalmicrophone/screens/resultPage.dart';
+import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'components/auth_page.dart';
@@ -7,7 +7,6 @@ import 'provider/play_audio_provider.dart';
 import 'screens/homePage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,15 +33,16 @@ class EntryRoot extends StatelessWidget {
           routes: {
 
             '/recordScreen': (context) => RecordAndPlayScreen(),
-            '/resultsPage': (context) => ShazamResultPage(
-                  name_and_artist:
-                      Provider.of<RecordAudioProvider>(context).song['name'],
-                  url: Provider.of<RecordAudioProvider>(context).song['url'],
-                  channel_url: Provider.of<RecordAudioProvider>(context)
-                      .song['channel_url'],
-                  image_url: Provider.of<RecordAudioProvider>(context)
-                      .song['image_url'],
-                ),
+            '/songPage' : (context) => SongPage(
+              name_and_artist:
+              Provider.of<RecordAudioProvider>(context).song['name'],
+              url: Provider.of<RecordAudioProvider>(context).song['url'],
+              channel_url: Provider.of<RecordAudioProvider>(context)
+                  .song['channel_url'],
+              image_url: Provider.of<RecordAudioProvider>(context)
+                  .song['image_url'],
+            ),
+
           },
           home: AuthPage()),
     );

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:finalmicrophone/screens/resultPage.dart';
+import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ShazamResultPage(
+        builder: (context) => SongPage(
           name_and_artist: songData['nameAndArtist'].toString(),
           url:  songData['url'].toString(),
           image_url:  songData['imageUrl'].toString(),

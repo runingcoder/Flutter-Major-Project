@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:finalmicrophone/screens/resultPage.dart';
+import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -45,7 +45,7 @@ class _HistoryListState extends State<HistoryList> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ShazamResultPage(
+        builder: (context) => SongPage(
           name_and_artist: songData['nameAndArtist'].toString(),
           url:  songData['url'].toString(),
           image_url:  songData['imageUrl'].toString(),
@@ -173,16 +173,48 @@ class _HistoryListState extends State<HistoryList> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
                                 ),),
-                              trailing: IconButton(
-                                icon: Icon(
-                                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                                  color: isFavorite ? Colors.red : Colors.white,
-                                ),
-                                onPressed: ()  {
-                                  doc.reference.update({'isFavorite': !isFavorite});
-                                   //worked when doing !isFavorite instead of isFavorite.
-                                   addSongToFavorites(doc['songName'],!isFavorite );
-                                },
+                              trailing: Wrap(
+                                spacing: -10,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                                      color: isFavorite ? Colors.red : Colors.white,
+                                    ),
+                                    onPressed: ()  {
+                                      doc.reference.update({'isFavorite': !isFavorite});
+                                       //worked when doing !isFavorite instead of isFavorite.
+                                       addSongToFavorites(doc['songName'],!isFavorite );
+                                    },
+                                  ),
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      cardColor: Colors.green.shade300, // Set the background color of the popup menu
+                                    ),
+                                    child: PopupMenuButton<String>(
+                                      icon: Icon(Icons.more_vert),
+                                      onSelected: (String choice) {
+                                        if (choice == 'delete') {
+                                          doc.reference.delete();
+                                        }
+                                      },
+                                      itemBuilder: (BuildContext context) {
+                                        return ['delete'].map((String choice) {
+                                          return PopupMenuItem<String>(
+                                            value: choice,
+
+                                            child: Text(choice,   style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),),
+                                          );
+                                        }).toList();
+                                      },
+                                      // rest of the code
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
