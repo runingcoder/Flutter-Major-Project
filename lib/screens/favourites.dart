@@ -117,6 +117,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: ListTile(
+                                    onTap: () async {
+                                      var requiredSong = await FirebaseFirestore.instance.collection('users').doc(uid)
+                                          .collection('songs')
+                                          .where('name', isEqualTo: songName)
+                                          .limit(1).get();
+                                      var songData = requiredSong.docs.first;
+                                      _openResultsPage(context, songData);
+                                    } ,
                                     selectedTileColor: Colors.cyanAccent[100],
                                     title: Text(
                                       songName,

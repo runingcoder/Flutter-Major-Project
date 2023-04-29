@@ -26,7 +26,7 @@ class _LoadingState extends State<LoadingState> {
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         seconds++;
-        if (seconds == 15) {
+        if (seconds >= 15 ) {
           statusText = "Almost there";
         } else if (seconds > 30) {
           statusText = "Taking more than usual";

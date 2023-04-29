@@ -18,46 +18,37 @@ class _HistoryListState extends State<HistoryList> {
   @override
   Widget build(BuildContext context) {
 
+    Future<void> addSongToFavorites(String songName, bool isFavorite, String artists, String ImageUrl) async {
+      final String uid = FirebaseAuth.instance.currentUser!.uid!;
+      final favoritesRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('favorites');
 
-    Future<void>  _showDeleteConfirmation(BuildContext context, DocumentReference docRef) async {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            color: Colors.grey.shade100,
-            height: 120,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+      final querySnapshot = await favoritesRef
+          .where('songName', isEqualTo: songName)
+          .limit(1)
+          .get();
 
-
-                Text(
-                  'Are you sure you want to delete this item?',
-                  style: TextStyle(fontSize: 20),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ElevatedButton(
-                      child: Text('Cancel'),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    ElevatedButton(
-                      child: Text('Delete'),
-                      onPressed: () {
-                        docRef.delete();
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(primary: Colors.red),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      );
+      if (isFavorite) {
+        if (querySnapshot.docs.isNotEmpty) {
+          final doc = querySnapshot.docs.first;
+          await doc.reference.update({'isFavorite': true});
+        } else {
+          await favoritesRef.add({
+            'songName': songName,
+            'isFavorite': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'artists' : artists,
+            'ImageUrl': ImageUrl
+          });
+        }
+      } else {
+        if (querySnapshot.docs.isNotEmpty) {
+          final doc = querySnapshot.docs.first;
+          await doc.reference.delete();
+        }
+      }
     }
 
     final String uid = FirebaseAuth.instance.currentUser!.uid!;
@@ -190,7 +181,7 @@ class _HistoryListState extends State<HistoryList> {
                                                 ),
                                                 onPressed: ()  {
                                                   doc.reference.update({'isFavorite': !isFavorite});
-                                                  Provider.of<RecordAudioProvider>(context).addSongToFavorites(songName, !isFavorite, songArtist, songImageUrl);
+                                                  addSongToFavorites(songName, !isFavorite, songArtist, songImageUrl);
                                                 },
                                               ),
                                               Theme(

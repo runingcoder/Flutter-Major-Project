@@ -16,45 +16,11 @@ import 'package:file_picker/file_picker.dart';
 enum IPLocation {
   mobileHotspot,
   riyanshWifi,
-  serverIP,
   NDMwifi
 
 }
 class   RecordAudioProvider extends ChangeNotifier {
 
-  Future<void> addSongToFavorites(String songName, bool isFavorite, String artists, String ImageUrl) async {
-    final String uid = FirebaseAuth.instance.currentUser!.uid!;
-    final favoritesRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('favorites');
-
-    final querySnapshot = await favoritesRef
-        .where('songName', isEqualTo: songName)
-        .limit(1)
-        .get();
-
-    if (isFavorite) {
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs.first;
-        await doc.reference.update({'isFavorite': true});
-      } else {
-        await favoritesRef.add({
-          'songName': songName,
-          'isFavorite': true,
-          'createdAt': FieldValue.serverTimestamp(),
-          'artists' : artists,
-          'ImageUrl': ImageUrl
-        });
-      }
-    } else {
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs.first;
-        await doc.reference.delete();
-      }
-    }
-    notifyListeners();
-  }
 
   IPLocation _ipLocation = IPLocation.riyanshWifi;
 
@@ -67,11 +33,6 @@ mobilehotspot () {
   _ipaddress = 'http://192.168.165.13:90/upload-audio';
   notifyListeners();
 }
-serverIP() {
-    _ipLocation = IPLocation.serverIP;
-    _ipaddress = 'http://3.225.21.221:90/upload-audio';
-    notifyListeners();
-  }
 
   riyanshwifi () {
     _ipLocation = IPLocation.riyanshWifi;
@@ -181,6 +142,7 @@ postRequest(String originalPath) async {
       print('hello there');
       Map<String, dynamic> useResponse = jsonDecode(finalResponse);
       setSong(useResponse);
+      print(song);
       changeStatus();
     } else {
       print('Error while uploading file');
