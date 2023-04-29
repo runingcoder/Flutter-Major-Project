@@ -16,10 +16,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
       context,
       MaterialPageRoute(
         builder: (context) => SongPage(
-          name_and_artist: songData['nameAndArtist'].toString(),
+          name: songData['nameAndArtist'].toString(),
           url:  songData['url'].toString(),
           image_url:  songData['imageUrl'].toString(),
-          channel_url:  songData['channelUrl'].toString(),
+          album_name:  songData['channelUrl'].toString(),
+          artists:  songData['artists'],
+          genres: songData['genres'],
         ),
       ),
     );

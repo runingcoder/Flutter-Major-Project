@@ -34,11 +34,14 @@ class EntryRoot extends StatelessWidget {
 
             '/recordScreen': (context) => RecordAndPlayScreen(),
             '/songPage' : (context) => SongPage(
-              name_and_artist:
+              artists:     Provider.of<RecordAudioProvider>(context).song['artists'],
+              genres:    Provider.of<RecordAudioProvider>(context).song['genres'],
+              album_name: Provider.of<RecordAudioProvider>(context)
+                  .song['album_name'],
+              name:
               Provider.of<RecordAudioProvider>(context).song['name'],
               url: Provider.of<RecordAudioProvider>(context).song['url'],
-              channel_url: Provider.of<RecordAudioProvider>(context)
-                  .song['channel_url'],
+
               image_url: Provider.of<RecordAudioProvider>(context)
                   .song['image_url'],
             ),

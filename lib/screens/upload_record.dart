@@ -73,12 +73,12 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
       });
     }
   }
-  Future<void> addSongToUser(String nameAndArtist, String url, String imageUrl, String channelUrl) async {
+  Future<void> addSongToUser(String name, String url, String imageUrl, String album_name, List genres, List artists) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
     final songsRef = userRef.collection('songs');
 
     // check if song already exists
-    final querySnapshot =  await songsRef.where('nameAndArtist', isEqualTo: nameAndArtist).limit(1).get();
+    final querySnapshot =  await songsRef.where('nameAndArtist', isEqualTo: name).limit(1).get();
 
     if (querySnapshot.docs.isNotEmpty) {
      print('this song is already available');
@@ -86,10 +86,12 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     }
     else{
       await songsRef.add({
-        'nameAndArtist': nameAndArtist,
+        'nameAndArtist': name,
         'url': url,
         'imageUrl': imageUrl,
-        'channelUrl': channelUrl,
+        'album_name': album_name,
+        'genres': genres,
+        'artists': artists
       });
     }
 
@@ -185,31 +187,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                                         color: Colors.black,
                                       ),
                                     ),
-                                    SizedBox(height: 30),
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () =>
-                                              _recordProvider.serverIP(),
-                                          child: Text(
-                                            'Server Connect',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontFamily: 'Roboto',
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 20),
-                                        Icon(Icons.check,
-                                            color: _recordProvider.ipLocation ==
-                                                IPLocation.serverIP
-                                                ? Colors.purple
-                                                : Colors.white),
-                                      ],
-                                    ),
+
                                     SizedBox(height: 20),
                                     Row(
                                       mainAxisAlignment:
@@ -383,7 +361,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         //send history collection data with taping in the see results page.
         addSongToHistory(_recordProvider.song['name'], false);
         print('reached hrere>');
-        addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['channel_url']);
+        addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['album_name'], _recordProvider.song['genres'],_recordProvider.song['artists']);
           Navigator.of(context).pushNamed('/songPage');
       },
       child: _recordProvider.received

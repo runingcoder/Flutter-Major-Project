@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import '../provider/record_audio_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../components/neubox.dart';
 
 class SongPage extends StatefulWidget {
-  final String name_and_artist;
+  final List genres;
+  final String album_name;
+  final String name;
   final String url;
-  final String channel_url;
+  final List artists;
+
   final String image_url;
 
   const SongPage({
     Key? key,
-    required this.name_and_artist,
+    required this.genres,
+    required this.album_name,
+
+    required this.name,
     required this.url,
-    required this.channel_url,
+
     required this.image_url,
+    required this.artists,
   }) : super(key: key);
 
   @override
@@ -74,7 +78,7 @@ class _SongPageState extends State<SongPage> {
                   ],
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 30),
 
                 // cover art, artist name, song name
                 NeuBox(
@@ -82,24 +86,18 @@ class _SongPageState extends State<SongPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child:       Image.network(
-                          widget.image_url,
+                        child:CachedNetworkImage(
+                        height: 280,
                           fit: BoxFit.fill,
-                          loadingBuilder: (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                    : null,
-                              ),
-                            );
-                          },
+                          progressIndicatorBuilder: (context, url, progress) => Center(
+                            child: CircularProgressIndicator(
+                              value: progress.progress,
+                            ),
+                          ),
+                          imageUrl: widget.image_url,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
@@ -107,7 +105,7 @@ class _SongPageState extends State<SongPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                widget.name_and_artist,
+                                widget.name,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
@@ -124,6 +122,30 @@ class _SongPageState extends State<SongPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      Text(
+                        widget.album_name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+
+                        ),
+                      ),
+                      Text(
+                        widget.genres.join(', '),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+
+                        ),
+                      ),
+                      Text(
+                        widget.artists.join(', '),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -147,7 +169,7 @@ class _SongPageState extends State<SongPage> {
                 NeuBox(
                   child: LinearPercentIndicator(
                     lineHeight: 10,
-                    percent: 0.8,
+                    percent: 0.4,
                     progressColor: Colors.green,
                     backgroundColor: Colors.transparent,
                   ),

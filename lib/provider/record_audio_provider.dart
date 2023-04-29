@@ -18,7 +18,7 @@ enum IPLocation {
   NDMwifi
 
 }
-class RecordAudioProvider extends ChangeNotifier {
+class   RecordAudioProvider extends ChangeNotifier {
 
 
   IPLocation _ipLocation = IPLocation.riyanshWifi;
@@ -72,9 +72,12 @@ serverIP() {
   Map<String, dynamic> _song = {
     'name': 'Example Song',
     'indices': '0000',
-    'city': 'Torronto',
     'url': 'https://www.youtube.com/watch?v=example',
-    'channel_url': 'Somthignsdf',
+    'album_name' : 'Some name',
+      "genres": ["genre1", "genre2"],
+    'artists': [
+      "Jagadish Samal"
+    ],
     'image_url': 'https://example.com/image.png',
   };
   bool _received = false;
