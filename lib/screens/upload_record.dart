@@ -347,9 +347,8 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     return InkWell(
       onTap: () {
         print(_recordProvider.song);
-        //send history collection data with taping in the see results page.
-        addSongToHistory(_recordProvider.song['name'], false, _recordProvider.song['artists'].join(', '),_recordProvider.song['imageUrl']);
-        print('reached hrere>');
+        addSongToHistory(_recordProvider.song['name'], false, _recordProvider.song['artists'][0], _recordProvider.song['image_url'].toString());
+        print('reached here>');
         addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['album_name'], _recordProvider.song['genres'],_recordProvider.song['artists']);
           Navigator.of(context).pushNamed('/songPage');
       },

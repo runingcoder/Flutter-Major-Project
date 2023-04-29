@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../components/loadingState.dart';
 import '../provider/record_audio_provider.dart';
 
 class HistoryList extends StatefulWidget {
@@ -15,39 +15,10 @@ class HistoryList extends StatefulWidget {
 }
 
 class _HistoryListState extends State<HistoryList> {
-  Future<void> addSongToFavorites(String songName, bool isFavorite) async {
-    final String uid = FirebaseAuth.instance.currentUser!.uid!;
-    final favoritesRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('favorites');
-
-    final querySnapshot = await favoritesRef
-        .where('songName', isEqualTo: songName)
-        .limit(1)
-        .get();
-
-    if (isFavorite) {
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs.first;
-        await doc.reference.update({'isFavorite': true});
-      } else {
-        await favoritesRef.add({
-          'songName': songName,
-          'isFavorite': true,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-    } else {
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs.first;
-        await doc.reference.delete();
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+
+
     Future<void>  _showDeleteConfirmation(BuildContext context, DocumentReference docRef) async {
       showModalBottomSheet(
         context: context,
@@ -99,7 +70,7 @@ class _HistoryListState extends State<HistoryList> {
           children: [
 
             Image.network(
-              imageUrlBG, // replace with your image URL
+              imageUrlBG,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
@@ -147,106 +118,124 @@ class _HistoryListState extends State<HistoryList> {
                             final doc = snapshot.data!.docs[index];
                             final songName = doc['songName'];
                             final isFavorite = doc['isFavorite'];
-                            final songArtist = doc['artists'].join(', ');
-                            final songImageUrl = doc['imageUrl'];
+                            final songArtist = doc['artists'];
+                            final songImageUrl = doc['ImageUrl'];
                             final createdAt = doc['createdAt'];
                             return Container(
                               decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    fit: BoxFit.cover, image: NetworkImage(imagetileBG)),
-                                color: Colors.lightBlueAccent.shade100,
-                                borderRadius: BorderRadius.circular(8.0),),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                               padding: EdgeInsets.all(10),
                               margin: EdgeInsets.symmetric(vertical: 4.0),
-
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Display the song image on the left of the tile
-                                  Image.network(
-                                    songImageUrl,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: ListTile(
-                                      selectedTileColor: Colors.cyanAccent[100],
-                                      title: Text(
-                                        songName,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(height: 4),
-                                          Text(
-                                            songArtist,
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      trailing: Wrap(
-                                        spacing: -10,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              isFavorite ? Icons.favorite : Icons.favorite_border,
-                                              color: isFavorite ? Colors.red : Colors.white,
-                                            ),
-                                            onPressed: ()  {
-                                              doc.reference.update({'isFavorite': !isFavorite});
-                                              addSongToFavorites(doc['songName'], !isFavorite);
-                                            },
-                                          ),
-                                          Theme(
-                                            data: Theme.of(context).copyWith(
-                                              cardColor: Colors.green.shade300, // Set the background color of the popup menu
-                                            ),
-                                            child: PopupMenuButton<String>(
-                                              icon: Icon(Icons.more_vert),
-                                              onSelected: (String choice) {
-                                                if (choice == 'delete') {
-                                                  doc.reference.delete();
-                                                }
-                                              },
-                                              itemBuilder: (BuildContext context) {
-                                                return ['delete'].map((String choice) {
-                                                  return PopupMenuItem<String>(
-                                                    value: choice,
-                                                    child: Text(
-                                                      choice,
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 18,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }).toList();
-                                              },
-                                            ),
-                                          ),
-                                        ],
+                                  // Display the date above the container
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      DateFormat('EEEE, MMM d').format(createdAt.toDate()),
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ),
-                                ]
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Display the song image on the left of the tile
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          songImageUrl,
+                                          fit: BoxFit.cover,
+                                          height: MediaQuery.of(context).size.height * 0.2,
+                                          width: MediaQuery.of(context).size.width * 0.3,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        child: ListTile(
+                                          selectedTileColor: Colors.cyanAccent[100],
+                                          title: Text(
+                                            songName,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(height: 4),
+                                              Text(
+                                                songArtist,
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          trailing: Wrap(
+                                            spacing: -10,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(
+                                                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                                                  color: isFavorite ? Colors.red : Colors.grey,
+                                                ),
+                                                onPressed: ()  {
+                                                  doc.reference.update({'isFavorite': !isFavorite});
+                                                  Provider.of<RecordAudioProvider>(context).addSongToFavorites(songName, !isFavorite, songArtist, songImageUrl);
+                                                },
+                                              ),
+                                              Theme(
+                                                data: Theme.of(context).copyWith(
+                                                  cardColor: Colors.green.shade300, // Set the background color of the popup menu
+                                                ),
+                                                child: PopupMenuButton<String>(
+                                                  icon: Icon(Icons.more_vert),
+                                                  onSelected: (String choice) {
+                                                    if (choice == 'delete') {
+                                                      doc.reference.delete();
+                                                    }
+                                                  },
+                                                  itemBuilder: (BuildContext context) {
+                                                    return ['delete'].map((String choice) {
+                                                      return PopupMenuItem<String>(
+                                                        value: choice,
+                                                        child: Text(
+                                                          choice,
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontWeight: FontWeight.bold,
+                                                            fontSize: 18,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList();
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
 
 
-                            ),
-                          );
-                        },
-                      );
-                    },
+                          },
+                        );
+
+                      },
                   ),
 
                   ),

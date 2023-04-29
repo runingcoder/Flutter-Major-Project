@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/record_audio_provider.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({Key? key}) : super(key: key);
@@ -82,38 +85,99 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       final doc = docs[index];
                       final songName = doc['songName'];
                       final isFavorite = doc['isFavorite'];
+                      final songArtist = doc['artists'];
+                      final songImageUrl = doc['ImageUrl'];
+                      final createdAt = doc['createdAt'];
 
                       return Container(
                         decoration: BoxDecoration(
-                          image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: NetworkImage(imagetileBG)),
-                          color: Colors.lightBlueAccent.shade100,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        padding: EdgeInsets.all(15),
+                        padding: EdgeInsets.all(10),
                         margin: EdgeInsets.symmetric(vertical: 4.0),
-                        child: ListTile(
-                          onTap: () async {
-                            print(doc['songName']);
-                            var requiredSong = await FirebaseFirestore.instance.collection('users').doc(uid)
-                                .collection('songs')
-                                .where('name', isEqualTo: songName)
-                                .limit(1).get();
-                            var songData = requiredSong.docs.first;
-                            print(songData['name']);
-                            print(songData['artists']);
-                            _openResultsPage(context, songData);
-                          } ,
-                          title: Text(songName, style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),),
-                          trailing: IconButton(
-                            icon: Icon(Icons.icecream_rounded,  color: Colors.green,),
-                            onPressed: () {},
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display the date above the container
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Display the song image on the left of the tile
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(
+                                    songImageUrl,
+                                    fit: BoxFit.cover,
+                                    height: MediaQuery.of(context).size.height * 0.2,
+                                    width: MediaQuery.of(context).size.width * 0.3,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: ListTile(
+                                    selectedTileColor: Colors.cyanAccent[100],
+                                    title: Text(
+                                      songName,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 4),
+                                        Text(
+                                          songArtist,
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: Wrap(
+                                      spacing: -10,
+                                      children: [
+
+                                        Theme(
+                                          data: Theme.of(context).copyWith(
+                                            cardColor: Colors.green.shade300, // Set the background color of the popup menu
+                                          ),
+                                          child: PopupMenuButton<String>(
+                                            icon: Icon(Icons.more_vert),
+                                            onSelected: (String choice) {
+                                              if (choice == 'delete') {
+                                                doc.reference.delete();
+                                              }
+                                            },
+                                            itemBuilder: (BuildContext context) {
+                                              return ['delete'].map((String choice) {
+                                                return PopupMenuItem<String>(
+                                                  value: choice,
+                                                  child: Text(
+                                                    choice,
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList();
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       );
                     },

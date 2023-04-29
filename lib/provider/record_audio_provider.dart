@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ffmpeg_kit_flutter/session_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,39 @@ enum IPLocation {
 }
 class   RecordAudioProvider extends ChangeNotifier {
 
+  Future<void> addSongToFavorites(String songName, bool isFavorite, String artists, String ImageUrl) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid!;
+    final favoritesRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('favorites');
+
+    final querySnapshot = await favoritesRef
+        .where('songName', isEqualTo: songName)
+        .limit(1)
+        .get();
+
+    if (isFavorite) {
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        await doc.reference.update({'isFavorite': true});
+      } else {
+        await favoritesRef.add({
+          'songName': songName,
+          'isFavorite': true,
+          'createdAt': FieldValue.serverTimestamp(),
+          'artists' : artists,
+          'ImageUrl': ImageUrl
+        });
+      }
+    } else {
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        await doc.reference.delete();
+      }
+    }
+    notifyListeners();
+  }
 
   IPLocation _ipLocation = IPLocation.riyanshWifi;
 
