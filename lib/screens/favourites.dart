@@ -16,12 +16,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
       context,
       MaterialPageRoute(
         builder: (context) => SongPage(
-          name: songData['nameAndArtist'].toString(),
+          name: songData['name'].toString(),
           url:  songData['url'].toString(),
           image_url:  songData['imageUrl'].toString(),
-          album_name:  songData['channelUrl'].toString(),
-          artists:  songData['artists'],
-          genres: songData['genres'],
+          album_name:  songData['album_name'].toString(),
+          artists: songData['artists'].join(', '),
+          genres: songData['genres'].join(', '),
         ),
       ),
     );
@@ -98,9 +98,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
                             print(doc['songName']);
                             var requiredSong = await FirebaseFirestore.instance.collection('users').doc(uid)
                                 .collection('songs')
-                                .where('nameAndArtist', isEqualTo: songName)
+                                .where('name', isEqualTo: songName)
                                 .limit(1).get();
                             var songData = requiredSong.docs.first;
+                            print(songData['name']);
+                            print(songData['artists']);
                             _openResultsPage(context, songData);
                           } ,
                           title: Text(songName, style: TextStyle(

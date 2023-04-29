@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:provider/provider.dart';
 import '../components/customBorder.dart';
+import '../components/loadingState.dart';
+import '../components/resusableGesture.dart';
 import '../provider/play_audio_provider.dart';
 import '../provider/record_audio_provider.dart';
 import 'package:http/http.dart' as http;
@@ -53,7 +55,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     }
   }
 
-  Future<void> addSongToHistory(String songName, bool isFavorite) async {
+  Future<void> addSongToHistory(String songName, bool isFavorite, String artists, String ImageUrl) async {
     final historyRef = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -70,6 +72,10 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         'songName': songName,
         'isFavorite': isFavorite,
         'createdAt': FieldValue.serverTimestamp(),
+        'artists' : artists,
+        'ImageUrl': ImageUrl
+
+
       });
     }
   }
@@ -78,7 +84,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     final songsRef = userRef.collection('songs');
 
     // check if song already exists
-    final querySnapshot =  await songsRef.where('nameAndArtist', isEqualTo: name).limit(1).get();
+    final querySnapshot =  await songsRef.where('name', isEqualTo: name).limit(1).get();
 
     if (querySnapshot.docs.isNotEmpty) {
      print('this song is already available');
@@ -86,7 +92,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     }
     else{
       await songsRef.add({
-        'nameAndArtist': name,
+        'name': name,
         'url': url,
         'imageUrl': imageUrl,
         'album_name': album_name,
@@ -103,10 +109,11 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
 
   @override
   Widget build(BuildContext context) {
-    print('eadf');
-    print(screenName);
-
-    bool isReceived = Provider.of<RecordAudioProvider>(context).received;
+    clearData() {
+      Provider.of<RecordAudioProvider>(context, listen: false)
+          .clearOldData();
+    }
+     bool isReceived = Provider.of<RecordAudioProvider>(context).received;
     bool connectionFail =
         Provider.of<RecordAudioProvider>(context).connectionfail;
 
@@ -157,12 +164,10 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // ElevatedButton(onPressed: (){
-                      //   Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(builder: (context) =>  SongPage()),
-                      //   );
-                      // } , child: Text('SongsPage')),
+                      if (isRecordingInProgress) LoadingState(onTap:clearData),
+                      if (!isRecordingInProgress) Text(''),
+                      if (isUploadingInProgress)LoadingState(onTap:clearData),
+                      if (!isUploadingInProgress) Text(''),
                       Visibility(
                         visible: uploadAudioCase,
                         child: Padding(
@@ -294,10 +299,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                       const SizedBox(
                         height: 40,
                       ),
-                      if (isRecordingInProgress) CircularProgressIndicator(),
-                      if (!isRecordingInProgress) Text(''),
-                      if (isUploadingInProgress) CircularProgressIndicator(),
-                      if (!isUploadingInProgress) Text(''),
+
 
 // _resetButton(),
 // _loadingPage(),
@@ -326,27 +328,14 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
             ),
           ),
           const SizedBox(height: 80),
-          GestureDetector(
+          CustomButton(
+            text: 'Go back',
             onTap: () {
               Provider.of<RecordAudioProvider>(context, listen: false)
                   .clearOldData();
             },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                'Go back',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
           ),
+
         ],
       ),
     );
@@ -359,7 +348,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
       onTap: () {
         print(_recordProvider.song);
         //send history collection data with taping in the see results page.
-        addSongToHistory(_recordProvider.song['name'], false);
+        addSongToHistory(_recordProvider.song['name'], false, _recordProvider.song['artists'].join(', '),_recordProvider.song['imageUrl']);
         print('reached hrere>');
         addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['album_name'], _recordProvider.song['genres'],_recordProvider.song['artists']);
           Navigator.of(context).pushNamed('/songPage');

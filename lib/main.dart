@@ -34,8 +34,8 @@ class EntryRoot extends StatelessWidget {
 
             '/recordScreen': (context) => RecordAndPlayScreen(),
             '/songPage' : (context) => SongPage(
-              artists:     Provider.of<RecordAudioProvider>(context).song['artists'],
-              genres:    Provider.of<RecordAudioProvider>(context).song['genres'],
+              artists:     Provider.of<RecordAudioProvider>(context).song['artists'].join(', '),
+              genres:    Provider.of<RecordAudioProvider>(context).song['genres'].join(', '),
               album_name: Provider.of<RecordAudioProvider>(context)
                   .song['album_name'],
               name:

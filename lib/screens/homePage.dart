@@ -9,6 +9,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/record_audio_provider.dart';
+import 'experiment.dart';
 
 class RecordAndPlayScreen extends StatefulWidget {
   const RecordAndPlayScreen({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
   int _selectedIndex = 0;
   static List<Widget> _widgetOptions = <Widget>[
     UploadAndRecord(),
-    HistoryList(),
+ HistoryList(),
     FavoritesPage(),
 
   ];
@@ -85,3 +86,5 @@ class _RecordAndPlayScreenState extends State<RecordAndPlayScreen> {
     FirebaseAuth.instance.signOut();
   }
 }
+
+

@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalmicrophone/screens/songsPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../components/loadingState.dart';
+import '../provider/record_audio_provider.dart';
 
 class HistoryList extends StatefulWidget {
   const HistoryList({Key? key}) : super(key: key);
@@ -41,25 +45,6 @@ class _HistoryListState extends State<HistoryList> {
       }
     }
   }
-  void _openResultsPage(BuildContext context, QueryDocumentSnapshot<Map<String, dynamic>> songData ) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SongPage(
-          name
-              : songData['nameAndArtist'].toString(),
-          url:  songData['url'].toString(),
-          image_url:  songData['imageUrl'].toString(),
-          album_name:  songData['channelUrl'].toString(),
-          artists:  songData['artists'],
-          genres: songData['genres'],
-        ),
-      ),
-    );
-  }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +58,8 @@ class _HistoryListState extends State<HistoryList> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
+
                 Text(
                   'Are you sure you want to delete this item?',
                   style: TextStyle(fontSize: 20),
@@ -110,6 +97,7 @@ class _HistoryListState extends State<HistoryList> {
 
         body: Stack (
           children: [
+
             Image.network(
               imageUrlBG, // replace with your image URL
               fit: BoxFit.cover,
@@ -159,6 +147,9 @@ class _HistoryListState extends State<HistoryList> {
                             final doc = snapshot.data!.docs[index];
                             final songName = doc['songName'];
                             final isFavorite = doc['isFavorite'];
+                            final songArtist = doc['artists'].join(', ');
+                            final songImageUrl = doc['imageUrl'];
+                            final createdAt = doc['createdAt'];
                             return Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
@@ -168,57 +159,89 @@ class _HistoryListState extends State<HistoryList> {
                               padding: EdgeInsets.all(10),
                               margin: EdgeInsets.symmetric(vertical: 4.0),
 
-                            child: ListTile(
-                              selectedTileColor : Colors.cyanAccent[100],
-                              title: Text(songName,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),),
-                              trailing: Wrap(
-                                spacing: -10,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                                      color: isFavorite ? Colors.red : Colors.white,
-                                    ),
-                                    onPressed: ()  {
-                                      doc.reference.update({'isFavorite': !isFavorite});
-                                       //worked when doing !isFavorite instead of isFavorite.
-                                       addSongToFavorites(doc['songName'],!isFavorite );
-                                    },
+                                  // Display the song image on the left of the tile
+                                  Image.network(
+                                    songImageUrl,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
                                   ),
-                                  Theme(
-                                    data: Theme.of(context).copyWith(
-                                      cardColor: Colors.green.shade300, // Set the background color of the popup menu
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: ListTile(
+                                      selectedTileColor: Colors.cyanAccent[100],
+                                      title: Text(
+                                        songName,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 4),
+                                          Text(
+                                            songArtist,
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: Wrap(
+                                        spacing: -10,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                                              color: isFavorite ? Colors.red : Colors.white,
+                                            ),
+                                            onPressed: ()  {
+                                              doc.reference.update({'isFavorite': !isFavorite});
+                                              addSongToFavorites(doc['songName'], !isFavorite);
+                                            },
+                                          ),
+                                          Theme(
+                                            data: Theme.of(context).copyWith(
+                                              cardColor: Colors.green.shade300, // Set the background color of the popup menu
+                                            ),
+                                            child: PopupMenuButton<String>(
+                                              icon: Icon(Icons.more_vert),
+                                              onSelected: (String choice) {
+                                                if (choice == 'delete') {
+                                                  doc.reference.delete();
+                                                }
+                                              },
+                                              itemBuilder: (BuildContext context) {
+                                                return ['delete'].map((String choice) {
+                                                  return PopupMenuItem<String>(
+                                                    value: choice,
+                                                    child: Text(
+                                                      choice,
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 18,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }).toList();
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    child: PopupMenuButton<String>(
-                                      icon: Icon(Icons.more_vert),
-                                      onSelected: (String choice) {
-                                        if (choice == 'delete') {
-                                          doc.reference.delete();
-                                        }
-                                      },
-                                      itemBuilder: (BuildContext context) {
-                                        return ['delete'].map((String choice) {
-                                          return PopupMenuItem<String>(
-                                            value: choice,
+                                  ),
+                                ]
 
-                                            child: Text(choice,   style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),),
-                                          );
-                                        }).toList();
-                                      },
-                                      // rest of the code
-                                    ),
-                                  ),
-                                ],
-                              ),
+
                             ),
                           );
                         },

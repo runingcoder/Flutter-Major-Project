@@ -6,11 +6,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../components/neubox.dart';
 
 class SongPage extends StatefulWidget {
-  final List genres;
+  final String genres;
   final String album_name;
   final String name;
   final String url;
-  final List artists;
+  final String artists;
 
   final String image_url;
 
@@ -131,7 +131,7 @@ class _SongPageState extends State<SongPage> {
                         ),
                       ),
                       Text(
-                        widget.genres.join(', '),
+                        widget.genres,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -139,7 +139,7 @@ class _SongPageState extends State<SongPage> {
                         ),
                       ),
                       Text(
-                        widget.artists.join(', '),
+                        widget.artists,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
