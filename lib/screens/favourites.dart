@@ -24,7 +24,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           image_url:  songData['imageUrl'].toString(),
           album_name:  songData['album_name'].toString(),
           artists: songData['artists'].join(', '),
-          genres: songData['genres'].join(', '),
+          genres: songData['genres'],
         ),
       ),
     );
@@ -118,8 +118,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 Expanded(
                                   child: ListTile(
                                     onTap: () async {
-                                      var requiredSong = await FirebaseFirestore.instance.collection('users').doc(uid)
-                                          .collection('songs')
+                                      var requiredSong = await FirebaseFirestore.instance.collection('songs')
                                           .where('name', isEqualTo: songName)
                                           .limit(1).get();
                                       var songData = requiredSong.docs.first;

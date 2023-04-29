@@ -1,12 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../components/GenreWidget.dart';
 import '../components/neubox.dart';
+import '../components/songClassforGenres.dart';
 
 class SongPage extends StatefulWidget {
-  final String genres;
+  final List<dynamic> genres;
   final String album_name;
   final String name;
   final String url;
@@ -31,11 +35,68 @@ class SongPage extends StatefulWidget {
 }
 
 class _SongPageState extends State<SongPage> {
+
+  final String uid = FirebaseAuth.instance.currentUser!.uid!;
+  late List<dynamic> genreSongs = [];
+
+
   late YoutubePlayerController _ycontroller;
+  Future<void> _fetchSongs(List<dynamic> genre) async {
+
+    try {
+      var  constSong = await FirebaseFirestore.instance
+          .collection('songs')
+          .where('name', isEqualTo: "Dark Necessities")
+          .limit(1)
+          .get();
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('RecommendGenres')
+          .where('name', isEqualTo: genre[0])
+          .limit(1)
+          .get();
+
+      final docSnapshot = querySnapshot.docs.first;
+      final songs = docSnapshot.data()['songs'];
+      print(songs);
+      List<dynamic> songsList = [];
+
+      for (var songName in songs) {
+        //so just, make sure all songs from songsOfGenres is imported in the database, and it will show.
+        var requiredSong = await FirebaseFirestore.instance
+            .collection('songs')
+            .where('name', isEqualTo: songName)
+            .limit(1)
+            .get();
+        var songData;
+        if (requiredSong.docs.isNotEmpty) {
+          songData = requiredSong.docs.first.data();
+        } else {
+          songData = constSong.docs.first.data();
+        }
+        var song = Song.fromJson(songData);
+        songsList.add(song);
+
+
+
+
+      }
+      print('should print songslist below!');
+      print(songsList[0].name);
+      print(songsList[1].name);
+      setState(() {
+        print(songsList);
+        genreSongs = songsList;
+      });
+    } catch (error) {
+      print('Error fetching songs: $error');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _fetchSongs(widget.genres);
     final videoId = YoutubePlayer.convertUrlToId(widget.url);
     _ycontroller = YoutubePlayerController(
       initialVideoId: videoId!,
@@ -48,6 +109,9 @@ class _SongPageState extends State<SongPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    var titleGenre = widget.genres;
+    var stringGenre = titleGenre.toString();
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SafeArea(
@@ -131,7 +195,7 @@ class _SongPageState extends State<SongPage> {
                         ),
                       ),
                       Text(
-                        widget.genres,
+                        stringGenre,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -245,6 +309,11 @@ class _SongPageState extends State<SongPage> {
                     ],
                   ),
                 ),
+
+                SizedBox(height: 100),
+            Text('You might also like'),
+            // GenreWidget(genreSongs:genreSongs ),
+
               ],
             ),
           ),

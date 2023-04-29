@@ -79,9 +79,8 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
       });
     }
   }
-  Future<void> addSongToUser(String name, String url, String imageUrl, String album_name, List genres, List artists) async {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
-    final songsRef = userRef.collection('songs');
+  Future<void> addSong(String name, String url, String imageUrl, String album_name, List genres, List artists) async {
+    final songsRef = FirebaseFirestore.instance.collection('songs');
 
     // check if song already exists
     final querySnapshot =  await songsRef.where('name', isEqualTo: name).limit(1).get();
@@ -349,7 +348,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
         print(_recordProvider.song);
         addSongToHistory(_recordProvider.song['name'], false, _recordProvider.song['artists'][0], _recordProvider.song['image_url'].toString());
         print('reached here>');
-        addSongToUser(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['album_name'], _recordProvider.song['genres'],_recordProvider.song['artists']);
+        addSong(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['album_name'], _recordProvider.song['genres'],_recordProvider.song['artists']);
           Navigator.of(context).pushNamed('/songPage');
       },
       child: _recordProvider.received
