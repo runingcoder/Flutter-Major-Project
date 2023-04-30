@@ -6,6 +6,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../components/GenreWidget.dart';
+import '../components/leftRighttext.dart';
 import '../components/neubox.dart';
 import '../components/songClassforGenres.dart';
 
@@ -35,14 +36,17 @@ class SongPage extends StatefulWidget {
 }
 
 class _SongPageState extends State<SongPage> {
-
+  late YoutubePlayerController _ycontroller;
   final String uid = FirebaseAuth.instance.currentUser!.uid!;
+  bool isLoading = true;
   late List<dynamic> genreSongs = [];
 
 
-  late YoutubePlayerController _ycontroller;
-  Future<void> _fetchSongs(List<dynamic> genre) async {
 
+  Future<void> _fetchSongs(List<dynamic> genre) async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       var  constSong = await FirebaseFirestore.instance
           .collection('songs')
@@ -87,8 +91,12 @@ class _SongPageState extends State<SongPage> {
       setState(() {
         print(songsList);
         genreSongs = songsList;
+        isLoading = false;
       });
     } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
       print('Error fetching songs: $error');
     }
   }
@@ -164,117 +172,43 @@ class _SongPageState extends State<SongPage> {
                       const SizedBox(height: 30),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                widget.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-
-                                ),
+                            Text(
+                              widget.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
                               ),
                             ),
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.red,
-                              size: 32,
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.artists,
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                const Icon(
+                                  Icons.favorite,
+                                  color: Colors.red,
+                                  size: 32,
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        widget.album_name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
 
-                        ),
-                      ),
-                      Text(
-                        stringGenre,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-
-                        ),
-                      ),
-                      Text(
-                        widget.artists,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-
-                        ),
-                      ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 30),
-
-                // start time, shuffle button, repeat button, end time
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    Text('0:00'),
-                    Icon(Icons.shuffle),
-                    Icon(Icons.repeat),
-                    Text('4:22')
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                // linear bar
-                NeuBox(
-                  child: LinearPercentIndicator(
-                    lineHeight: 10,
-                    percent: 0.4,
-                    progressColor: Colors.green,
-                    backgroundColor: Colors.transparent,
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // previous song, pause play, skip next song
-                SizedBox(
-                  height: 80,
-                  child: Row(
-                    children: const [
-                      Expanded(
-                        child: NeuBox(
-                            child: Icon(
-                          Icons.skip_previous,
-                          size: 32,
-                        )),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.0),
-                          child: NeuBox(
-                              child: Icon(
-                            Icons.play_arrow,
-                            size: 32,
-                          )),
-                        ),
-                      ),
-                      Expanded(
-                        child: NeuBox(
-                            child: Icon(
-                          Icons.skip_next,
-                          size: 32,
-                        )),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 50),
+                SizedBox(height: 70),
                 NeuBox(
                   child: Column(
                     children: [
@@ -310,9 +244,47 @@ class _SongPageState extends State<SongPage> {
                   ),
                 ),
 
+                SizedBox(height: 70),
+
+                isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : GenreWidget(genreSongs:genreSongs ),
                 SizedBox(height: 100),
-            Text('You might also like'),
-            // GenreWidget(genreSongs:genreSongs ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Track Information',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+                LeftRightText(
+                  leftText: 'Track',
+                  rightText: widget.name,
+                ),
+                LeftRightText(
+                  leftText: 'Album',
+                  rightText: widget.album_name,
+                ),
+
+                LeftRightText(
+                  leftText: 'Artists',
+                  rightText: widget.artists,
+                ),
+                LeftRightText(
+                  leftText: 'Genres',
+                  rightText: widget.genres.toString(),
+                ),
+
+
+
 
               ],
             ),

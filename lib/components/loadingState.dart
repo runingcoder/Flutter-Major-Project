@@ -27,9 +27,9 @@ class _LoadingState extends State<LoadingState> {
       setState(() {
         seconds++;
         if (seconds >= 15 ) {
-          statusText = "Almost there";
+          statusText = "Almost there" + "." * (seconds % 3 + 1);
         } else if (seconds > 30) {
-          statusText = "Taking more than usual";
+          statusText = "Taking more than usual" + "." * (seconds % 3 + 1);
           timer.cancel();
         } else {
           statusText = "System is searching for the song" + "." * (seconds % 3 + 1);
