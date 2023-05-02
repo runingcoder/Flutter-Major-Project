@@ -111,7 +111,7 @@ class _HistoryListState extends State<HistoryList> {
                             final doc = snapshot.data!.docs[index];
                             final songName = doc['songName'];
                             final isFavorite = doc['isFavorite'];
-                            final songArtist = doc['artists'];
+                            final songArtist = doc['artists'][0];
                             final songImageUrl = doc['ImageUrl'];
                             final createdAt = doc['createdAt'];
                             return Container(

@@ -173,111 +173,111 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                       if (!isRecordingInProgress) Text(''),
                       if (isUploadingInProgress)LoadingState(onTap:clearData),
                       if (!isUploadingInProgress) Text(''),
-                      // Visibility(
-                      //   visible: uploadAudioCase,
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.all(18.0),
-                      //     child: UnicornOutlineButton(
-                      //       strokeWidth: 2,
-                      //       radius: 24,
-                      //       gradient: LinearGradient(
-                      //           colors: [Colors.black, Colors.redAccent]),
-                      //       onPressed: () => {},
-                      //       child: Container(
-                      //         padding: EdgeInsets.symmetric(vertical: 15),
-                      //         child: Column(
-                      //             mainAxisAlignment: MainAxisAlignment.center,
-                      //             children: [
-                      //               Text(
-                      //                 'Switch IP',
-                      //                 style: TextStyle(
-                      //                   fontSize: 30,
-                      //                   fontWeight: FontWeight.bold,
-                      //                   fontFamily: 'Roboto',
-                      //                   color: Colors.black,
-                      //                 ),
-                      //               ),
-                      //
-                      //               SizedBox(height: 20),
-                      //               Row(
-                      //                 mainAxisAlignment:
-                      //                     MainAxisAlignment.center,
-                      //                 children: [
-                      //                   GestureDetector(
-                      //                     onTap: () =>
-                      //                         _recordProvider.riyanshwifi(),
-                      //                     child: Text(
-                      //                       'Riyansh Wifi',
-                      //                       style: TextStyle(
-                      //                         fontSize: 20,
-                      //                         fontFamily: 'Roboto',
-                      //                         color: Colors.black,
-                      //                       ),
-                      //                     ),
-                      //                   ),
-                      //                   SizedBox(width: 20),
-                      //                   Icon(Icons.check,
-                      //                       color: _recordProvider.ipLocation ==
-                      //                               IPLocation.riyanshWifi
-                      //                           ? Colors.purple
-                      //                           : Colors.white),
-                      //                 ],
-                      //               ),
-                      //               SizedBox(height: 20),
-                      //               Row(
-                      //                 mainAxisAlignment:
-                      //                 MainAxisAlignment.center,
-                      //                 children: [
-                      //                   GestureDetector(
-                      //                     onTap: () =>
-                      //                         _recordProvider.NDMwifi(),
-                      //                     child: Text(
-                      //                       'NDM Wifi',
-                      //                       style: TextStyle(
-                      //                         fontSize: 20,
-                      //                         fontFamily: 'Roboto',
-                      //                         color: Colors.black,
-                      //                       ),
-                      //                     ),
-                      //                   ),
-                      //                   SizedBox(width: 20),
-                      //                   Icon(Icons.check,
-                      //                       color: _recordProvider.ipLocation ==
-                      //                           IPLocation.NDMwifi
-                      //                           ? Colors.purple
-                      //                           : Colors.white),
-                      //                 ],
-                      //               ),
-                      //               SizedBox(height: 20),
-                      //               Row(
-                      //                 mainAxisAlignment:
-                      //                     MainAxisAlignment.center,
-                      //                 children: [
-                      //                   GestureDetector(
-                      //                     onTap: () =>
-                      //                         _recordProvider.mobilehotspot(),
-                      //                     child: Text(
-                      //                       'Mobile Hotspot',
-                      //                       style: TextStyle(
-                      //                         fontSize: 20,
-                      //                         fontFamily: 'Roboto',
-                      //                         color: Colors.black,
-                      //                       ),
-                      //                     ),
-                      //                   ),
-                      //                   SizedBox(width: 20),
-                      //                   Icon(Icons.check,
-                      //                       color: _recordProvider.ipLocation ==
-                      //                               IPLocation.mobileHotspot
-                      //                           ? Colors.purple
-                      //                           : Colors.white),
-                      //                 ],
-                      //               ),
-                      //             ]),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      Visibility(
+                        visible: uploadAudioCase,
+                        child: Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: UnicornOutlineButton(
+                            strokeWidth: 2,
+                            radius: 24,
+                            gradient: LinearGradient(
+                                colors: [Colors.black, Colors.redAccent]),
+                            onPressed: () => {},
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 15),
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Switch IP',
+                                      style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Roboto',
+                                        color: Colors.black,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.riyanshwifi(),
+                                          child: Text(
+                                            'Riyansh Wifi',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                    IPLocation.riyanshWifi
+                                                ? Colors.purple
+                                                : Colors.white),
+                                      ],
+                                    ),
+                                    SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.NDMwifi(),
+                                          child: Text(
+                                            'NDM Wifi',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                IPLocation.NDMwifi
+                                                ? Colors.purple
+                                                : Colors.white),
+                                      ],
+                                    ),
+                                    SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () =>
+                                              _recordProvider.mobilehotspot(),
+                                          child: Text(
+                                            'Mobile Hotspot',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontFamily: 'Roboto',
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 20),
+                                        Icon(Icons.check,
+                                            color: _recordProvider.ipLocation ==
+                                                    IPLocation.mobileHotspot
+                                                ? Colors.purple
+                                                : Colors.white),
+                                      ],
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(
                         height: 30,

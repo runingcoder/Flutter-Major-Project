@@ -23,7 +23,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           url:  songData['url'].toString(),
           image_url:  songData['imageUrl'].toString(),
           album_name:  songData['album_name'].toString(),
-          artists: songData['artists'].join(', '),
+          artists: songData['artists'],
           genres: songData['genres'],
         ),
       ),

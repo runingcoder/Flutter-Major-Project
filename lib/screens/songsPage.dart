@@ -15,7 +15,7 @@ class SongPage extends StatefulWidget {
   final String album_name;
   final String name;
   final String url;
-  final String artists;
+  final List<dynamic>  artists;
 
   final String image_url;
 
@@ -39,13 +39,15 @@ class _SongPageState extends State<SongPage> {
   late YoutubePlayerController _ycontroller;
   final String uid = FirebaseAuth.instance.currentUser!.uid!;
   bool isLoading = true;
+  bool isLoadingArtistSong = true;
   late List<dynamic> genreSongs = [];
+  late List<dynamic> artistSongs = [];
 
 
 
-  Future<void> _fetchSongs(List<dynamic> genre) async {
+  Future<void> _fetchSongs(List<dynamic> givenList, String collectionName, bool loadingState) async {
     setState(() {
-      isLoading = true;
+      loadingState = true;
     });
     try {
       var  constSong = await FirebaseFirestore.instance
@@ -55,14 +57,13 @@ class _SongPageState extends State<SongPage> {
           .get();
 
       final querySnapshot = await FirebaseFirestore.instance
-          .collection('RecommendGenres')
-          .where('name', isEqualTo: genre[0])
+          .collection(collectionName)
+          .where('name', isEqualTo: givenList[0])
           .limit(1)
           .get();
 
       final docSnapshot = querySnapshot.docs.first;
       final songs = docSnapshot.data()['songs'];
-      print(songs);
       List<dynamic> songsList = [];
 
       for (var songName in songs) {
@@ -85,17 +86,18 @@ class _SongPageState extends State<SongPage> {
 
 
       }
-      print('should print songslist below!');
-      print(songsList[0].name);
-      print(songsList[1].name);
       setState(() {
         print(songsList);
-        genreSongs = songsList;
-        isLoading = false;
+        if (collectionName == 'RecommendGenres') {
+          genreSongs = songsList;
+        } else {
+          artistSongs = songsList;
+        }
+        loadingState = false;
       });
     } catch (error) {
       setState(() {
-        isLoading = false;
+        loadingState = false;
       });
       print('Error fetching songs: $error');
     }
@@ -104,7 +106,8 @@ class _SongPageState extends State<SongPage> {
   @override
   void initState() {
     super.initState();
-    _fetchSongs(widget.genres);
+    _fetchSongs(widget.genres, 'RecommendGenres',isLoading );
+    _fetchSongs(widget.artists, 'artists', isLoadingArtistSong);
     final videoId = YoutubePlayer.convertUrlToId(widget.url);
     _ycontroller = YoutubePlayerController(
       initialVideoId: videoId!,
@@ -117,9 +120,6 @@ class _SongPageState extends State<SongPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    var titleGenre = widget.genres;
-    var stringGenre = titleGenre.toString();
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: SafeArea(
@@ -184,7 +184,7 @@ class _SongPageState extends State<SongPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              widget.artists,
+                              widget.artists.join(', '),
                               style: TextStyle(
                                 fontSize: 16,
                               ),
@@ -209,6 +209,10 @@ class _SongPageState extends State<SongPage> {
                 ),
 
                 SizedBox(height: 70),
+              isLoadingArtistSong? Center(child: CircularProgressIndicator())
+              : GenreWidget(songsList:artistSongs , textTitle: 'Top Songs'),
+
+      SizedBox(height: 70),
                 NeuBox(
                   child: Column(
                     children: [
@@ -248,7 +252,7 @@ class _SongPageState extends State<SongPage> {
 
                 isLoading
                     ? Center(child: CircularProgressIndicator())
-                    : GenreWidget(genreSongs:genreSongs ),
+                    : GenreWidget(songsList:genreSongs, textTitle: 'You may also like' ),
                 SizedBox(height: 100),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -276,11 +280,11 @@ class _SongPageState extends State<SongPage> {
 
                 LeftRightText(
                   leftText: 'Artists',
-                  rightText: widget.artists,
+                  rightText: widget.artists.join(', '),
                 ),
                 LeftRightText(
                   leftText: 'Genres',
-                  rightText: widget.genres.toString(),
+                  rightText: widget.genres.join(', '),
                 ),
 
 
