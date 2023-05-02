@@ -55,7 +55,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     }
   }
 
-  Future<void> addSongToHistory(String songName, bool isFavorite, String artists, String ImageUrl) async {
+  Future<void> addSongToHistory(String songName, bool isFavorite, List<dynamic> artists, String ImageUrl) async {
     final historyRef = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -352,7 +352,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
     return InkWell(
       onTap: () {
         print(_recordProvider.song);
-        addSongToHistory(_recordProvider.song['name'], false, _recordProvider.song['artists'][0], _recordProvider.song['image_url'].toString());
+        addSongToHistory(_recordProvider.song['name'], false, _recordProvider.song['artists'], _recordProvider.song['image_url'].toString());
         print('reached here>');
         addSong(_recordProvider.song['name'],  _recordProvider.song['url'], _recordProvider.song['image_url'], _recordProvider.song['album_name'], _recordProvider.song['genres'],_recordProvider.song['artists']);
           Navigator.of(context).pushNamed('/songPage');

@@ -15,7 +15,7 @@ class SongPage extends StatefulWidget {
   final String album_name;
   final String name;
   final String url;
-  final List<dynamic>  artists;
+  final List<dynamic> artists;
 
   final String image_url;
 
@@ -23,10 +23,8 @@ class SongPage extends StatefulWidget {
     Key? key,
     required this.genres,
     required this.album_name,
-
     required this.name,
     required this.url,
-
     required this.image_url,
     required this.artists,
   }) : super(key: key);
@@ -43,19 +41,12 @@ class _SongPageState extends State<SongPage> {
   late List<dynamic> genreSongs = [];
   late List<dynamic> artistSongs = [];
 
-
-
-  Future<void> _fetchSongs(List<dynamic> givenList, String collectionName, bool loadingState) async {
+  Future<void> _fetchSongs(
+      List<dynamic> givenList, String collectionName, bool loadingState) async {
     setState(() {
       loadingState = true;
     });
     try {
-      var  constSong = await FirebaseFirestore.instance
-          .collection('songs')
-          .where('name', isEqualTo: "Dark Necessities")
-          .limit(1)
-          .get();
-
       final querySnapshot = await FirebaseFirestore.instance
           .collection(collectionName)
           .where('name', isEqualTo: givenList[0])
@@ -76,28 +67,30 @@ class _SongPageState extends State<SongPage> {
         var songData;
         if (requiredSong.docs.isNotEmpty) {
           songData = requiredSong.docs.first.data();
-        } else {
-          songData = constSong.docs.first.data();
         }
-        var song = Song.fromJson(songData);
-        songsList.add(song);
-
-
-
-
+        if (songData != null) {
+          var song = Song.fromJson(songData);
+          songsList.add(song);
+        }
       }
       setState(() {
         print(songsList);
         if (collectionName == 'RecommendGenres') {
           genreSongs = songsList;
+          isLoading = false;
         } else {
           artistSongs = songsList;
+          isLoadingArtistSong = false;
         }
         loadingState = false;
       });
     } catch (error) {
       setState(() {
-        loadingState = false;
+        if (collectionName == 'RecommendGenres') {
+          isLoading = false;
+        } else {
+          isLoadingArtistSong = false;
+        }
       });
       print('Error fetching songs: $error');
     }
@@ -106,7 +99,7 @@ class _SongPageState extends State<SongPage> {
   @override
   void initState() {
     super.initState();
-    _fetchSongs(widget.genres, 'RecommendGenres',isLoading );
+    _fetchSongs(widget.genres, 'RecommendGenres', isLoading);
     _fetchSongs(widget.artists, 'artists', isLoadingArtistSong);
     final videoId = YoutubePlayer.convertUrlToId(widget.url);
     _ycontroller = YoutubePlayerController(
@@ -137,9 +130,7 @@ class _SongPageState extends State<SongPage> {
                     SizedBox(
                       height: 60,
                       width: 60,
-                      child: NeuBox(
-                          child: BackButton(
-                              )),
+                      child: NeuBox(child: BackButton()),
                     ),
                     Text('Y  O U R  S O N G !'),
                     SizedBox(
@@ -158,10 +149,11 @@ class _SongPageState extends State<SongPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child:CachedNetworkImage(
-                        height: 280,
+                        child: CachedNetworkImage(
+                          height: 280,
                           fit: BoxFit.fill,
-                          progressIndicatorBuilder: (context, url, progress) => Center(
+                          progressIndicatorBuilder: (context, url, progress) =>
+                              Center(
                             child: CircularProgressIndicator(
                               value: progress.progress,
                             ),
@@ -203,16 +195,17 @@ class _SongPageState extends State<SongPage> {
                           ],
                         ),
                       ),
-
                     ],
                   ),
                 ),
 
                 SizedBox(height: 70),
-              isLoadingArtistSong? Center(child: CircularProgressIndicator())
-              : GenreWidget(songsList:artistSongs , textTitle: 'Top Songs'),
+                isLoadingArtistSong
+                    ? Center(child: CircularProgressIndicator())
+                    : GenreWidget(
+                        songsList: artistSongs, textTitle: 'Top Songs'),
 
-      SizedBox(height: 70),
+                SizedBox(height: 70),
                 NeuBox(
                   child: Column(
                     children: [
@@ -252,7 +245,8 @@ class _SongPageState extends State<SongPage> {
 
                 isLoading
                     ? Center(child: CircularProgressIndicator())
-                    : GenreWidget(songsList:genreSongs, textTitle: 'You may also like' ),
+                    : GenreWidget(
+                        songsList: genreSongs, textTitle: 'You may also like'),
                 SizedBox(height: 100),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -286,10 +280,6 @@ class _SongPageState extends State<SongPage> {
                   leftText: 'Genres',
                   rightText: widget.genres.join(', '),
                 ),
-
-
-
-
               ],
             ),
           ),
