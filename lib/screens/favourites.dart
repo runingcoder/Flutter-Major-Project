@@ -63,14 +63,13 @@ class _FavoritesPageState extends State<FavoritesPage>  {
   @override
   Widget build(BuildContext context) {
     final String uid = FirebaseAuth.instance.currentUser!.uid!;
-    String imagetileBG = 'https://images.unsplash.com/photo-1565386239166-a1233b30138d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80';
     String imageUrlBG =
         'https://images.unsplash.com/photo-1550895030-823330fc2551?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
     return Scaffold(
         body: Stack(
       children: [
-        Image.network(
-          imageUrlBG, // replace with your image URL
+        Image.asset(
+          'images/background.jpg',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,

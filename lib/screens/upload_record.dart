@@ -164,7 +164,7 @@ class _UploadAndRecordState extends State<UploadAndRecord> {
                 height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        fit: BoxFit.cover, image: NetworkImage(imageUrlBG))),
+                        fit: BoxFit.cover,  image: AssetImage('images/background.jpg'))),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
