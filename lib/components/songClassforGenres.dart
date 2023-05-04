@@ -12,4 +12,20 @@ class Song {
       artistName: json['artists'].join(', '),
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'imageUrl': imageUrl,
+      'name': name,
+      'artistName': artistName,
+    };
+  }
+
+  factory Song.fromMap(Map<String, dynamic> map) {
+    return Song(
+      imageUrl: map['imageUrl'],
+      name: map['name'],
+      artistName: map['artistName'],
+    );
+  }
 }

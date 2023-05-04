@@ -13,21 +13,51 @@ class FavoritesPage extends StatefulWidget {
   State<FavoritesPage> createState() => _FavoritesPageState();
 }
 
-class _FavoritesPageState extends State<FavoritesPage> {
-  void _openResultsPage(BuildContext context, QueryDocumentSnapshot<Map<String, dynamic>> songData ) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SongPage(
-          name: songData['name'].toString(),
-          url:  songData['url'].toString(),
-          image_url:  songData['imageUrl'].toString(),
-          album_name:  songData['album_name'].toString(),
-          artists: songData['artists'],
-          genres: songData['genres'],
+class _FavoritesPageState extends State<FavoritesPage>  {
+
+  void _openResultsPage(BuildContext context, String songName )  async {
+    final recordProvider = Provider.of<RecordAudioProvider>(context, listen:false);
+    await recordProvider.loadCachedSong(songName);
+    if (recordProvider.song != null && recordProvider.song['name'] == songName) {
+      print('WEnt from here,  loadedcache.');
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SongPage(
+            name: recordProvider.song['name'].toString(),
+            url:  recordProvider.song['url'].toString(),
+            image_url:  recordProvider.song['image_url'].toString(),
+            album_name:  recordProvider.song['album_name'].toString(),
+            artists: recordProvider.song['artists'],
+            genres: recordProvider.song['genres'],
+          ),
         ),
-      ),
-    );
+      );
+    }
+    else {
+      var requiredSong = await FirebaseFirestore.instance.collection('songs')
+          .where('name', isEqualTo: songName)
+          .limit(1).get();
+      var songData = requiredSong.docs.first;
+      print('WEnt from here,  fetched the song again.');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SongPage(
+            name: songData['name'].toString(),
+            url:  songData['url'].toString(),
+            image_url:  songData['imageUrl'].toString(),
+            album_name: songData['album_name'].toString(),
+            artists: songData['artists'],
+            genres: songData['genres'],
+          ),
+        ),
+      );
+
+
+    }
+
   }
 
   @override
@@ -118,11 +148,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 Expanded(
                                   child: ListTile(
                                     onTap: () async {
-                                      var requiredSong = await FirebaseFirestore.instance.collection('songs')
-                                          .where('name', isEqualTo: songName)
-                                          .limit(1).get();
-                                      var songData = requiredSong.docs.first;
-                                      _openResultsPage(context, songData);
+                                      _openResultsPage(context, songName);
                                     } ,
                                     selectedTileColor: Colors.cyanAccent[100],
                                     title: Text(

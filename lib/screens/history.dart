@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../provider/record_audio_provider.dart';
 
@@ -15,8 +16,28 @@ class HistoryList extends StatefulWidget {
 }
 
 class _HistoryListState extends State<HistoryList> {
+
+
+
   @override
   Widget build(BuildContext context) {
+    Future<void> printCachedValues() async {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      print('Cached values:');
+      for (var key in keys) {
+        final value = prefs.get(key);
+        if (value is String) {
+          print('$key: $value');
+        } else {
+          final list = value as List<dynamic>;
+          print('$key: $list');
+        }
+      }
+    }
+
+     printCachedValues();
+
 
     Future<void> addSongToFavorites(String songName, bool isFavorite, String artists, String ImageUrl) async {
       final String uid = FirebaseAuth.instance.currentUser!.uid!;

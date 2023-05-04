@@ -1,9 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ffmpeg_kit_flutter/session_state.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -13,14 +10,18 @@ import 'package:finalmicrophone/services/permission_management.dart';
 import 'package:finalmicrophone/services/toast_services.dart';
 import 'package:file_picker/file_picker.dart';
 
+
+
 enum IPLocation {
   mobileHotspot,
   riyanshWifi,
   NDMwifi
 
 }
-class   RecordAudioProvider extends ChangeNotifier {
+class  RecordAudioProvider extends ChangeNotifier {
+  final BuildContext context;
 
+  RecordAudioProvider(this.context);
 
   IPLocation _ipLocation = IPLocation.riyanshWifi;
 
@@ -61,9 +62,7 @@ mobilehotspot () {
     _keepLoading = true;
   }
 
-  final BuildContext context;
 
-  RecordAudioProvider(this.context);
 
   Map<String, dynamic> _song = {
     'name': 'Example Song',
@@ -87,10 +86,14 @@ mobilehotspot () {
 
   Map<String, dynamic> get song => _song;
 
-  void setSong(Map<String, dynamic> newSong) {
+  void setSong(String songName, Map<String, dynamic> newSong) async {
     _song = newSong;
+    final prefs = await SharedPreferences.getInstance();
+    final songJson = jsonEncode(newSong);
+    prefs.setString(songName, songJson);
     notifyListeners();
   }
+
 
   final Record _record = Record();
   bool _isRecording = false;
@@ -113,6 +116,11 @@ mobilehotspot () {
     _uploadStatus =false;
     notifyListeners();
   }
+  // Caches the song data to SharedPreferences
+
+
+  static const _songIndexKey = 'songIndex'; // Key for SharedPreferences cache
+
 postRequest(String originalPath) async {
   //  could user ping discover network to know if a particular ip and port is available or not
   //so that we can quickly set connectionfail =true when we set ipaddress that's unavailable.
@@ -139,9 +147,10 @@ postRequest(String originalPath) async {
       _responseTime = endTime.difference(startTime);
       notifyListeners();
       var finalResponse = await response.stream.bytesToString();
-      print('hello there');
       Map<String, dynamic> useResponse = jsonDecode(finalResponse);
-      setSong(useResponse);
+      String songName = useResponse['name'];
+      setSong(songName, useResponse);
+
       print(song);
       changeStatus();
     } else {
@@ -161,6 +170,16 @@ postRequest(String originalPath) async {
     notifyListeners();
   }
 }
+   loadCachedSong(String songName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final songJson = prefs.getString(songName);
+    if (songJson != null) {
+      _song = jsonDecode(songJson);
+      print('song is printed here');
+      print(song);
+      notifyListeners();
+    }
+  }
   recordVoice() async {
     print("entered recordVoice");
     final _isPermitted = (await PermissionManagement.recordingPermission()) &&
