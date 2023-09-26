@@ -14,3 +14,8 @@ To set this up, the safest way is so that the laptop doesn't hang and you don't 
 11. Run `flutter run` after closing other apps to ensure smooth execution.
 
 Tried to apply SOLID principles to my app, but since I am using ChangeNotifier, there is no need. It is efficient as it is.
+
+DEMO:
+
+
+![Demo GIF](images/demoMajorProject.gif)
